@@ -1,0 +1,1 @@
+# Scriptable-widget-for-Strava
