@@ -1,5 +1,5 @@
 // Updater config
-const url = 'https://raw.githubusercontent.com/marvnsch/Scriptable-Strava-Widget/main/Strava_activity_widget.js';
+const url = 'https://raw.githubusercontent.com/marvnsch/Scriptable-widget-for-Strava/main/Strava_activity_widget.js';
 const scriptName = 'Strava-Activity-Widget-Remote'
 
 // API config
