@@ -2,20 +2,24 @@
 const lineWeight = 2.5
 
 // Widget Colors
-let backColor = new Color('1D1C21')
-let fillColor = new Color('FC4C02')
-let textColor = new Color('EDEDED')
-let textColor1 = new Color('FC4C02')
-let textColor2 = new Color('5B5A5E')
-let mapColor = new Color('000000')
+if (darkMode = Device.isUsingDarkAppearance()){
+  let backColor = new Color('1D1C21')
+  let fillColor = new Color('FC4C02')
+  let textColor = new Color('EDEDED')
+  let textColor1 = new Color('FC4C02')
+  let textColor2 = new Color('5B5A5E')
+  let mapColor = new Color('000000')
+} else {
+  let backColor = new Color('FFFFFF')
+  let fillColor = new Color('FC4C02')
+  let textColor = new Color('1D1C21')
+  let textColor1 = new Color('FC4C02')
+  let textColor2 = new Color('5B5A5E')
+  let mapColor = new Color('E6E6E6')
+}
 
 //Widget Params, default values for debugging
 let widgetInput = args.widgetParameter;
-const debug = false;
-
-// Widget size
-const widgetHeight = 360
-const widgetWidth = 360
 
 // Widget spacer
 let timeSpacer = 0
@@ -26,15 +30,15 @@ let kudosSpacer = 0
 const workoutTypeBike = "Ride";
 const workoutTypeRun = "Run";
 
-// Authentication Link
+// Authentication link
 const auth_link = "https://www.strava.com/oauth/token"
 
-// Context initialization
+// Context initialization for the map
 let drawContext = new DrawContext()
 drawContext.respectScreenScale = true;
 drawContext.opaque = false;
 
-// Context initialization
+// Context initialization for the icon
 let activityIcon = new DrawContext()
 activityIcon.respectScreenScale = true;
 activityIcon.opaque = false;
@@ -102,32 +106,32 @@ function drawActivityIcon(workout){
 }
 
 function createDateData(workout){
-  let dateString = workout.start_date;
-  let year = dateString.slice(0,4);
-  let month = dateString.slice(5,7);
-  let day = dateString.slice(8,10);
-  return `${day}.${month}.${year} `
+  let dateString = new Date(workout.start_date);
+  return dateString.toLocaleDateString('de-DE', {day: 'numeric', month: 'numeric', year: 'numeric',})
+  //let year = dateString.slice(0,4);
+  //let month = dateString.slice(5,7);
+  //let day = dateString.slice(8,10);
+  //return `${dateString.toLocaleDateString()}.${dateString.getMonth()}.${dateString.getFullYear()}`
 }
 
 function createTimeData(workout){
-  let timeString = workout.start_date_local
-  return timeString.slice(11,16)
+  let dateString = workout.start_date_local
+  return dateString.slice(11,16)
 }
 
 function createVelData(workout){
   if (workout.type === workoutTypeBike){
-    let vel = (workout.average_speed*3.6).toFixed(0)
-    return (`${vel} km/h`);
+    return (`${(workout.average_speed * 3.6).toFixed(0)} km/h`);
   } else if (workout.type === workoutTypeRun){
-    let sec = (1000/workout.average_speed)
-    let min = Number(String(sec/60).charAt(0))
-    sec = (sec - min*60).toFixed(0);
+    let sec = (1000 / workout.average_speed)
+    let min = Number(String(sec / 60).charAt(0))
+    sec = (sec - min * 60).toFixed(0);
     if(sec < 10){
       sec = `0${sec}`;
     }
     return (`${min.toFixed(0)}:${sec} /km`);
   } else {
-    return ("error");
+    return "error";
   }
 }
 
@@ -136,15 +140,15 @@ function createDistData(workout){
   return (`${(dist).replace(".", ",")} km`);
 }
 
-function createDuraData(workout){
-  let hour = Math.floor(workout.moving_time/3600)
-  let min = Math.floor(workout.moving_time/60)
-  let sec = (workout.moving_time%60).toFixed(0)
-  if (hour > 0){
-    return (`${hour}:${min}:${sec}`);
-  } else {
-    return (`${min}:${sec}`);
-  }
+function createDurData(workout){
+  let move_time = workout.moving_time
+  let hour = Math.floor(move_time / 3600)
+  let min = Math.floor(move_time / 60 - hour * 60)
+  if (min < 10) {min = `0${min}`}
+  let sec = (move_time - hour * 3600 - min * 60)
+  if (sec < 10) {sec = `0${min}`}
+  if (hour > 0) {return (`${hour}:${min}:${sec}`);}
+  else {return (`${min}:${sec}`);}
 }
 
 function createMapData(workout){
@@ -152,30 +156,29 @@ function createMapData(workout){
 }
 
 function createKudosData(workout){
-  let kudos = workout.kudos_count
-  return (` ${kudos} Kudos`)
+  return (` ${workout.kudos_count} Kudos`)
 }
 
 function createElevGainData(workout){
-  let elevationGain = (workout.total_elevation_gain).toFixed(0)
-  return (`↑${elevationGain} m`)
+  return (`↑${(workout.total_elevation_gain).toFixed(0)} m`)
 }
 
 function createCaloriesData(workout){
-  let calories = (workout.kilojoules/4.184).toFixed(0)
+  let calories = (workout.kilojoules / 4.184).toFixed(0)
   return (`${calories} k/cal`)
 }
 
 function setSpacers(workout){
+  let screen_factor = 375 / Device.screenSize()[0] //Screen size of the clients device related to the debugging device
   if (workout.type === workoutTypeBike){
-    timeSpacer = 23.5
-    velSpacer = 8.5
-    kudosSpacer = 5
+    timeSpacer = 23.5 * screen_factor
+    velSpacer = 8.5 * screen_factor
+    kudosSpacer = 5 * screen_factor
   }
   else if (workout.type === workoutTypeRun){
-    timeSpacer = 14
-    velSpacer = 5
-    kudosSpacer = 7.5
+    timeSpacer = 14 * screen_factor
+    velSpacer = 5 * screen_factor
+    kudosSpacer = 7.5 * screen_factor
   }
   else {
     return ("error");
@@ -463,17 +466,16 @@ if (widgetInput.length !== 40) {
   firstLineSubstack.layoutVertically();
   firstLineSubstack.size = new Size(90, 30);
 
-  let title = firstLineSubstack.addText(newest_activity.name)
-  title.font = Font.mediumSystemFont(14)
-  title.textColor = textColor
-  title.leftAlignText();
-  title.lineLimit = 1;
-
   let timeDate = firstLineSubstack.addText(createDateData(newest_activity)+" "+createTimeData(newest_activity))
   timeDate.font = Font.boldSystemFont(9)
   timeDate.textColor = textColor2
   timeDate.leftAlignText();
 
+  let title = firstLineSubstack.addText(newest_activity.name)
+  title.font = Font.mediumSystemFont(14)
+  title.textColor = textColor
+  title.leftAlignText();
+  title.lineLimit = 1;
 
   widget.addSpacer(14);
 
@@ -516,7 +518,7 @@ if (widgetInput.length !== 40) {
   let firstDataSubstackRight = dataStackRight.addStack()
   firstDataSubstackRight.layoutHorizontally()
   firstDataSubstackRight.addSpacer(timeSpacer)
-  let duraText = firstDataSubstackRight.addText(createDuraData(newest_activity))
+  let duraText = firstDataSubstackRight.addText(createDurData(newest_activity))
   duraText.font = Font.mediumSystemFont(13)
   duraText.textColor = textColor1;
 
