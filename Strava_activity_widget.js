@@ -155,10 +155,6 @@ function createDurData(workout) {
     }
 }
 
-function createMapData(workout) {
-    return decodePolyline(workout.map.summary_polyline, 5)
-}
-
 function createKudosData(workout) {
     return (` ${workout.kudos_count} Kudos`)
 }
@@ -417,9 +413,7 @@ async function setupAssistant() {
 /////////////////////// Initial Config //////////////////////
 /////////////////////////////////////////////////////////////
 
-if (widgetInput !== null) {
-    const ref_token = widgetInput.toString()
-} else if (!config.runsInWidget && config.runsInApp) {
+if (!config.runsInWidget && config.runsInApp) {
     const prompt = new Alert()
     prompt.message = 'Möchtest du den Setup Assistant starten?'
     prompt.addAction('Ja')
