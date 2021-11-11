@@ -1,6 +1,7 @@
-// Debugging
-let debug = true
+// Widget Params, default values for debugging
+let widgetInput = args.widgetParameter;
 let ref_token = widgetInput.toString()
+let debug = true
 
 // Map lineweight
 const lineWeight = 2.5
@@ -24,9 +25,6 @@ const colorPalette = {
         mapColor: '292929'
     }
 }
-
-//Widget Params, default values for debugging
-let widgetInput = args.widgetParameter;
 
 // Widget spacer
 let timeSpacer = 0
@@ -260,6 +258,7 @@ class Map {
     static drawGraph(strava_map){
         let input_array = this.decodePolyline(strava_map,5)
         let dataPointsToShow = input_array.length
+        let raw_lat_array = []
         let lat_array = []
         let lon_array = []
         let spaceLeft = 25
