@@ -9,7 +9,7 @@ const colorPalette = {
         textColor: 'EDEDED',
         textColor1: 'FC4C02',
         textColor2: '5B5A5E',
-        mapColor: '000000'
+        mapColor: '292929'
     },
     light: {
         backColor: 'FFFFFF',
@@ -17,7 +17,7 @@ const colorPalette = {
         textColor: '1D1C21',
         textColor1: 'FC4C02',
         textColor2: '5B5A5E',
-        mapColor: 'E6E6E6'
+        mapColor: '292929'
     }
 }
 
@@ -263,18 +263,23 @@ class Map {
         let scaleFactor
 
         for (let i = 0; i < dataPointsToShow - 1; i++) {
-            lat_array.push(input_array[i][1])
+            lat_array.push(input_array[i][0])
         }
         for (let i = 0; i < dataPointsToShow - 1; i++) {
-            lon_array.push(input_array[i][0])
+            lon_array.push(input_array[i][1])
         }
 
-        let latMin = Math.min(...lat_array)
-        let lonMin = Math.min(...lon_array)
         let latMax = Math.max(...lat_array)
+        let latMin = Math.min(...lat_array)
+
+        lat_array = this.alignLatCoords(lat_array, latMin, latMax);
+
+        latMin = Math.min(...lat_array)
+        latMax = Math.max(...lat_array)
+        let lonMin = Math.min(...lon_array)
         let lonMax = Math.max(...lon_array)
-        let difLat = latMax - latMin;
-        let difLon = lonMax - lonMin;
+        let difLat = latMax - latMin
+        let difLon = lonMax - lonMin
 
         let difToLeft = latMin
         let difToTop = lonMin
@@ -343,6 +348,14 @@ class Map {
         }
 
         return coordinates;
+    }
+
+    static alignLatCoords(lat_array, lat_min, lat_max){
+        let lat_points = lat_array.length
+        for (let i = 0; i > lat_points; i++){
+            lat_array[i] = lat_array[i] * -1 + lat_max +lat_min;
+        }
+        return lat_array
     }
 }
 
