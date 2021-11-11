@@ -1,3 +1,7 @@
+// Debugging
+let debug = true
+let ref_token = widgetInput.toString()
+
 // Map lineweight
 const lineWeight = 2.5
 
@@ -263,19 +267,21 @@ class Map {
         let scaleFactor
 
         for (let i = 0; i < dataPointsToShow - 1; i++) {
-            lat_array.push(input_array[i][0])
+            raw_lat_array.push(input_array[i][0])
         }
         for (let i = 0; i < dataPointsToShow - 1; i++) {
             lon_array.push(input_array[i][1])
         }
 
-        let latMax = Math.max(...lat_array)
+        let rawLatMax = Math.max(...raw_lat_array)
+        let rawLatMin = Math.min(...raw_lat_array)
+        let lat_points = raw_lat_array.length
+        for (let i = 0; i < lat_points; i++){
+            lat_array[i] = raw_lat_array[i] * -1 + rawLatMax + rawLatMin;
+        }
+
         let latMin = Math.min(...lat_array)
-
-        lat_array = this.alignLatCoords(lat_array, latMin, latMax);
-
-        latMin = Math.min(...lat_array)
-        latMax = Math.max(...lat_array)
+        let latMax = Math.max(...lat_array)
         let lonMin = Math.min(...lon_array)
         let lonMax = Math.max(...lon_array)
         let difLat = latMax - latMin
@@ -350,13 +356,6 @@ class Map {
         return coordinates;
     }
 
-    static alignLatCoords(lat_array, lat_min, lat_max){
-        let lat_points = lat_array.length
-        for (let i = 0; i > lat_points; i++){
-            lat_array[i] = lat_array[i] * -1 + lat_max +lat_min;
-        }
-        return lat_array
-    }
 }
 
 function drawLine(relContext, point1, point2, width, color) {
@@ -432,20 +431,23 @@ if (!config.runsInWidget && config.runsInApp) {
     if (await prompt.presentAlert() === 0) {
         await setupAssistant()
     }
-    return Script.complete()
+    if (debug === false){
+        return Script.complete()
+    }
 }
-
-if (widgetInput.length !== 40) {
-    let widget = new ListWidget();
-    let initInfo = widget.addText("Bitte starte den Einrichtungs-assistenten, indem du das Skript in der Scriptable App ausführst.")
-    initInfo.font = Font.mediumSystemFont(14)
-    initInfo.textColor = getColor('fillColor');
-    Script.setWidget(widget)
-    Script.complete()
+if (debug === false){
+    if (widgetInput.length !== 40) {
+        let widget = new ListWidget();
+        let initInfo = widget.addText("Bitte starte den Einrichtungs-assistenten, indem du das Skript in der Scriptable App ausführst.")
+        initInfo.font = Font.mediumSystemFont(14)
+        initInfo.textColor = getColor('fillColor');
+        Script.setWidget(widget)
+        Script.complete()
+    }
 }
 
 // Preparation of data for widget
-let acc_token = await getAuthToken(widgetInput.toString());
+let acc_token = await getAuthToken(ref_token);
 let newest_activity = await getNewestActivity(acc_token)
 
 if (newest_activity.type !== workoutTypeBike && newest_activity.type !== workoutTypeRun) {
