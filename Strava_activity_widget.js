@@ -186,7 +186,7 @@ function setSpacers(workout) {
 function getColor(colorName) {
     let lightColor = new Color(colorPalette['light'][colorName])
     let darkColor = new Color(colorPalette['dark'][colorName])
-    return new Color.dynamic(lightColor, darkColor)
+    return Color.dynamic(lightColor, darkColor)
 }
 
 async function getNewestActivity(access_token) {
