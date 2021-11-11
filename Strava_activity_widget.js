@@ -259,6 +259,7 @@ class Map {
         let input_array = this.decodePolyline(strava_map,5)
         let dataPointsToShow = input_array.length
         let raw_lat_array = []
+        let raw_lon_array = []
         let lat_array = []
         let lon_array = []
         let spaceLeft = 25
@@ -269,7 +270,7 @@ class Map {
             raw_lat_array.push(input_array[i][0])
         }
         for (let i = 0; i < dataPointsToShow - 1; i++) {
-            lon_array.push(input_array[i][1])
+            raw_lon_array.push(input_array[i][1])
         }
 
         let rawLatMax = Math.max(...raw_lat_array)
@@ -277,6 +278,13 @@ class Map {
         let lat_points = raw_lat_array.length
         for (let i = 0; i < lat_points; i++){
             lat_array[i] = raw_lat_array[i] * -1 + rawLatMax + rawLatMin;
+        }
+
+        let rawLonMax = Math.max(...raw_lon_array)
+        let rawLonMin = Math.min(...raw_lon_array)
+        let lon_points = raw_lon_array.length
+        for (let i = 0; i < lon_points; i++){
+            lon_array[i] = raw_lon_array[i] * -1 + rawLonMax + rawLonMin;
         }
 
         let latMin = Math.min(...lat_array)
