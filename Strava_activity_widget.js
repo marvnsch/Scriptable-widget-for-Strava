@@ -184,12 +184,7 @@ function setSpacers(workout) {
 }
 
 function getColor(colorName) {
-    if (Device.isUsingDarkAppearance()) {
-        mode = "dark"
-    } else {
-        mode = "light"
-    }
-    return new Color(colorPalette[mode][colorName])
+    return new Color.dynamic(colorPalette['light'][colorName], colorPalette['dark'][colorName])
 }
 
 async function getNewestActivity(access_token) {
