@@ -293,16 +293,16 @@ class Map {
         }
 
         for (let i = (dataPointsToShow - 1), j = 0; i >= 0; i--, j++) {
-            raw_lat_array[j] = ((raw_lat_array[j] - latMin) * scaleFactor);// + spaceLeft
-            raw_lon_array[j] = ((raw_lon_array[j] - lonMin) * scaleFactor);// + spaceTop
+            raw_lat_array[j] = ((raw_lat_array[j] - latMin) * scaleFactor);
+            raw_lon_array[j] = ((raw_lon_array[j] - lonMin) * scaleFactor);
         }
 
         for (let i = (dataPointsToShow - 1), j = 0; i >= 0; i--, j++) {
-            let lat = raw_lon_array[j] * -1 + squareSize + spaceLeft
-            let lon = raw_lat_array[j] + spaceTop
+            let lat = raw_lon_array[j] + spaceLeft
+            let lon = raw_lat_array[j] * -1 + squareSize + spaceTop
             if (i > 0) {
-                let nextlat = raw_lon_array[j + 1] * -1 + squareSize + spaceLeft
-                let nextlon = raw_lat_array[j + 1] + spaceTop
+                let nextlat = raw_lon_array[j + 1] + spaceLeft
+                let nextlon = raw_lat_array[j + 1] * -1 + squareSize + spaceTop
                 let point1 = new Point(lat, lon)
                 let point2 = new Point(nextlat, nextlon)
                 drawLine(drawContext, point1, point2, lineWeight, getColor('mapColor'))
