@@ -265,6 +265,7 @@ class Map {
         let spaceLeft = 25
         let spaceTop = 55
         let scaleFactor
+        let squareSize
 
         for (let i = 0; i < dataPointsToShow - 1; i++) {
             raw_lat_array.push(input_array[i][0])
@@ -273,45 +274,35 @@ class Map {
             raw_lon_array.push(input_array[i][1])
         }
 
-        let rawLatMax = Math.max(...raw_lat_array)
-        let rawLatMin = Math.min(...raw_lat_array)
-        let lat_points = raw_lat_array.length
-        for (let i = 0; i < lat_points; i++){
-            lat_array[i] = raw_lat_array[i] * -1 + rawLatMax + rawLatMin;
-        }
-
-        let rawLonMax = Math.max(...raw_lon_array)
-        let rawLonMin = Math.min(...raw_lon_array)
-        let lon_points = raw_lon_array.length
-        for (let i = 0; i < lon_points; i++){
-            lon_array[i] = raw_lon_array[i] * -1 + rawLonMax + rawLonMin;
-        }
-
-        let latMin = Math.min(...lat_array)
-        let latMax = Math.max(...lat_array)
-        let lonMin = Math.min(...lon_array)
-        let lonMax = Math.max(...lon_array)
+        let latMin = Math.min(...raw_lat_array)
+        let latMax = Math.max(...raw_lat_array)
+        let lonMin = Math.min(...raw_lon_array)
+        let lonMax = Math.max(...raw_lon_array)
         let difLat = latMax - latMin
         let difLon = lonMax - lonMin
-
-        let difToLeft = latMin
-        let difToTop = lonMin
 
         if (difLat > difLon) {
             scaleFactor = (150 / difLat).toFixed(2);
             spaceTop = spaceTop + (150 - difLon * scaleFactor) / 2;
+            squareSize = 150;
         }
         if (difLon > difLat) {
             scaleFactor = (125 / difLon).toFixed(2);
             spaceLeft = (200 - difLat * scaleFactor) / 2;
+            squareSize = 125;
         }
 
         for (let i = (dataPointsToShow - 1), j = 0; i >= 0; i--, j++) {
-            let lat = ((lat_array[j] - difToLeft) * scaleFactor) + spaceLeft
-            let lon = ((lon_array[j] - difToTop) * scaleFactor) + spaceTop
+            raw_lat_array[j] = ((raw_lat_array[j] - latMin) * scaleFactor);// + spaceLeft
+            raw_lon_array[j] = ((raw_lon_array[j] - lonMin) * scaleFactor);// + spaceTop
+        }
+
+        for (let i = (dataPointsToShow - 1), j = 0; i >= 0; i--, j++) {
+            let lat = raw_lon_array[j] * -1 + squareSize + spaceLeft
+            let lon = raw_lat_array[j] + spaceTop
             if (i > 0) {
-                let nextlat = ((lat_array[j + 1] - difToLeft) * scaleFactor) + spaceLeft
-                let nextlon = ((lon_array[j + 1] - difToTop) * scaleFactor) + spaceTop
+                let nextlat = raw_lon_array[j + 1] * -1 + squareSize + spaceLeft
+                let nextlon = raw_lat_array[j + 1] + spaceTop
                 let point1 = new Point(lat, lon)
                 let point2 = new Point(nextlat, nextlon)
                 drawLine(drawContext, point1, point2, lineWeight, getColor('mapColor'))
