@@ -14,7 +14,7 @@ const colorPalette = {
         textColor: 'EDEDED',
         textColor1: 'FC4C02',
         textColor2: '5B5A5E',
-        mapColor: '292929'
+        mapColor: 'B5B0B8'
     },
     light: {
         backColor: 'FFFFFF',
@@ -22,7 +22,7 @@ const colorPalette = {
         textColor: '1D1C21',
         textColor1: 'FC4C02',
         textColor2: '5B5A5E',
-        mapColor: '292929'
+        mapColor: 'B5B0B8'
     }
 }
 
@@ -274,10 +274,19 @@ class Map {
             raw_lon_array.push(input_array[i][1])
         }
 
-        let latMin = Math.min(...raw_lat_array)
-        let latMax = Math.max(...raw_lat_array)
-        let lonMin = Math.min(...raw_lon_array)
-        let lonMax = Math.max(...raw_lon_array)
+        let rawLatMax = Math.max(...raw_lat_array)
+
+        for (let i = 0; i < dataPointsToShow - 1; i++) {
+            lat_array.push(raw_lon_array[i])
+        }
+        for (let i = 0; i < dataPointsToShow - 1; i++) {
+            lon_array.push(raw_lat_array[i] * -1 + rawLatMax)
+        }
+
+        let latMin = Math.min(...lat_array)
+        let latMax = Math.max(...lat_array)
+        let lonMin = Math.min(...lon_array)
+        let lonMax = Math.max(...lon_array)
         let difLat = latMax - latMin
         let difLon = lonMax - lonMin
 
@@ -293,16 +302,16 @@ class Map {
         }
 
         for (let i = (dataPointsToShow - 1), j = 0; i >= 0; i--, j++) {
-            raw_lat_array[j] = ((raw_lat_array[j] - latMin) * scaleFactor);
-            raw_lon_array[j] = ((raw_lon_array[j] - lonMin) * scaleFactor);
+            lat_array[j] = ((lat_array[j] - latMin) * scaleFactor);
+            lon_array[j] = ((lon_array[j] - lonMin) * scaleFactor);
         }
 
         for (let i = (dataPointsToShow - 1), j = 0; i >= 0; i--, j++) {
-            let lat = raw_lon_array[j] + spaceLeft
-            let lon = raw_lat_array[j] * -1 + squareSize + spaceTop
+            let lat = lat_array[j] + spaceLeft
+            let lon = lon_array[j] + spaceTop
             if (i > 0) {
-                let nextlat = raw_lon_array[j + 1] + spaceLeft
-                let nextlon = raw_lat_array[j + 1] * -1 + squareSize + spaceTop
+                let nextlat = lat_array[j + 1] + spaceLeft
+                let nextlon = lon_array[j + 1] + spaceTop
                 let point1 = new Point(lat, lon)
                 let point2 = new Point(nextlat, nextlon)
                 drawLine(drawContext, point1, point2, lineWeight, getColor('mapColor'))
