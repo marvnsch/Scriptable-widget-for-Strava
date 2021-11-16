@@ -291,14 +291,12 @@ class Map {
         let difLon = lonMax - lonMin
 
         if (difLat > difLon) {
-            scaleFactor = (150 / difLat).toFixed(2);
+            scaleFactor = (125 / difLat).toFixed(2);
             spaceTop = spaceTop + (150 - difLon * scaleFactor) / 2;
-            squareSize = 150;
         }
         if (difLon > difLat) {
             scaleFactor = (125 / difLon).toFixed(2);
             spaceLeft = (200 - difLat * scaleFactor) / 2;
-            squareSize = 125;
         }
 
         for (let i = (dataPointsToShow - 1), j = 0; i >= 0; i--, j++) {
