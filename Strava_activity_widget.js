@@ -1,6 +1,7 @@
 // Widget Params, default values for debugging
-let widgetInput = args.widgetParameter;
-let ref_token = widgetInput.toString()
+let widgetInput = args.widgetParameter.split(";")
+let ref_token = widgetInput[0].toString()
+let layout = widgetInput[1];
 let debug = true
 
 // Map lineweight
@@ -456,6 +457,19 @@ let acc_token = await getAuthToken(ref_token);
 let newest_activity = await getNewestActivity(acc_token)
 
 /////////////////////////////////////////////////////////////
+//////////////// Widget Layout - Debugging //////////////////
+/////////////////////////////////////////////////////////////
+
+let widgetDebugging = new ListWidget();
+let debugOutput = widgetDebugging.addText("ref_token: " + ref_token.toString())
+debugOutput.font = Font.mediumSystemFont(14)
+debugOutput.textColor = getColor('fillColor');
+
+let debugOutput2 = widgetDebugging.addText("Layout: " + layout.toString())
+debugOutput2.font = Font.mediumSystemFont(14)
+debugOutput2.textColor = getColor('fillColor');
+
+/////////////////////////////////////////////////////////////
 /////////// Widget Layout - Wrong Activity Type /////////////
 /////////////////////////////////////////////////////////////
 
@@ -572,10 +586,11 @@ kudosText.textColor = getColor('textColor1');
 
 widget.addSpacer(5)
 
-if (newest_activity.type !== workoutTypeBike && newest_activity.type !== workoutTypeRun) {
+if (debug === true) {
+    Script.setWidget(widgetDebugging)
+} else if (newest_activity.type !== workoutTypeBike && newest_activity.type !== workoutTypeRun) {
     Script.setWidget(widgetWrongType)
-    Script.complete()
 } else {
     Script.setWidget(widget)
-    Script.complete()
 }
+Script.complete()
