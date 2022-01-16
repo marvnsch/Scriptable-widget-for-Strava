@@ -455,21 +455,26 @@ if (debug === false){
 let acc_token = await getAuthToken(ref_token);
 let newest_activity = await getNewestActivity(acc_token)
 
-if (newest_activity.type !== workoutTypeBike && newest_activity.type !== workoutTypeRun) {
-    let widget = new ListWidget();
-    let initInfo = widget.addText("Der Typ Deines letzten Workouts wird leider nicht unterstützt.")
-    initInfo.font = Font.mediumSystemFont(14)
-    initInfo.textColor = getColor('fillColor');
-    Script.setWidget(widget)
-    Script.complete()
-}
+/////////////////////////////////////////////////////////////
+/////////// Widget Layout - Wrong Activity Type /////////////
+/////////////////////////////////////////////////////////////
+
+let widgetWrongType = new ListWidget();
+let initInfo = widgetWrongType.addText("🌳️🚴🏻‍♂️🌳🏃🏼‍♀️🏃🏻‍♂️🌳\n\nDer Typ Deines letzten Workouts wird leider nicht unterstützt.")
+initInfo.font = Font.mediumSystemFont(14)
+initInfo.textColor = getColor('fillColor');
+initInfo.centerAlignText();
 
 /////////////////////////////////////////////////////////////
-/////////////////////// Widget Layout ///////////////////////
+///////////// Widget Layout - Newest Activity ///////////////
 /////////////////////////////////////////////////////////////
 
 // Prepare background map
-Map.drawGraph(newest_activity.map.summary_polyline);
+try {
+        Map.drawGraph(newest_activity.map.summary_polyline);
+    } catch (error) {
+        console.log("Can´t draw graph!")
+    }
 
 // Create widget
 let widget = new ListWidget();
@@ -567,5 +572,10 @@ kudosText.textColor = getColor('textColor1');
 
 widget.addSpacer(5)
 
-Script.setWidget(widget)
-Script.complete()
+if (newest_activity.type !== workoutTypeBike && newest_activity.type !== workoutTypeRun) {
+    Script.setWidget(widgetWrongType)
+    Script.complete()
+} else {
+    Script.setWidget(widget)
+    Script.complete()
+}
