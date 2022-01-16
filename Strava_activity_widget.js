@@ -1,8 +1,12 @@
 // Widget Params, default values for debugging
-let widgetInput = args.widgetParameter.split(";")
+try {
+    widgetInput = args.widgetParameter.split(";")
+} catch (e) {
+    widgetInput = "".split(";"); //fallback debugging in app parameter
+}
 let ref_token = widgetInput[0].toString()
 let layout = widgetInput[1];
-let debug = true
+let debug = false
 
 // Map lineweight
 const lineWeight = 2.5
