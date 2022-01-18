@@ -432,7 +432,7 @@ async function setupAssistant() {
 /////////////////////// Initial Config //////////////////////
 /////////////////////////////////////////////////////////////
 
-if (!config.runsInWidget && config.runsInApp) {
+if (!config.runsInWidget && config.runsInApp && !debug) {
     const prompt = new Alert()
     prompt.message = 'Möchtest du den Setup Assistant starten?'
     prompt.addAction('Ja')
@@ -592,6 +592,7 @@ widget.addSpacer(5)
 
 if (debug === true) {
     Script.setWidget(widgetDebugging)
+    console.log("Data of newest_activity:\n"+JSON.stringify(newest_activity, null, 4))
 } else if (newest_activity.type !== workoutTypeBike && newest_activity.type !== workoutTypeRun) {
     Script.setWidget(widgetWrongType)
 } else {
