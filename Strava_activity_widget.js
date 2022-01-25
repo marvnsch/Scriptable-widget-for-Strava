@@ -7,8 +7,9 @@ try {
 let ref_token = widgetInput[0].toString()
 let layout = widgetInput[1];
 let debug = false
-let cacheManager = FileManager.createLocal();
-const cacheFile = "StravaWidgetBackup.json";
+let cacheManager = FileManager.iCloud();
+const docDir = cacheManager.documentsDirectory()
+const cacheFile = cacheManager.joinPath(docDir, "StravaWidgetBackup.txt");
 
 // Map lineweight
 const lineWeight = 2.5
@@ -458,13 +459,14 @@ if (debug === false){
 }
 
 // Preparation of data for widget
+let newest_activity;
 try {
     const acc_token = await getAuthToken(ref_token);
-    const newest_activity = await getNewestActivity(acc_token);
-    cacheManager.write(cacheFile, newest_activity);
+    newest_activity = await getNewestActivity(acc_token);
+    cacheManager.writeString(cacheFile, JSON.stringify(newest_activity));
 } catch(error) {
     if (cacheManager.fileExists(cacheFile)) {
-        const newest_activity = cacheManager.read(cacheFile)
+        newest_activity = JSON.parse(cacheManager.readString(cacheFile));
     } else {
         debug = true;
     }
