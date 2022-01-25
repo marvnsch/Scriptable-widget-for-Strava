@@ -19,7 +19,7 @@ const colorPalette = {
         textColor: 'EDEDED',
         textColor1: 'FC4C02',
         textColor2: '5B5A5E',
-        mapColor: 'B5B0B8'
+        mapColor: '707474'
     },
     light: {
         backColor: 'FFFFFF',
@@ -270,7 +270,6 @@ class Map {
         let spaceLeft = 25
         let spaceTop = 55
         let scaleFactor
-        let squareSize
 
         for (let i = 0; i < dataPointsToShow - 1; i++) {
             raw_lat_array.push(input_array[i][0])
@@ -442,7 +441,7 @@ if (!config.runsInWidget && config.runsInApp && !debug) {
         await setupAssistant()
     }
     if (debug === false){
-        return Script.complete()
+        Script.complete()
     }
 }
 if (debug === false){
@@ -457,8 +456,14 @@ if (debug === false){
 }
 
 // Preparation of data for widget
-let acc_token = await getAuthToken(ref_token);
-let newest_activity = await getNewestActivity(acc_token)
+try {
+    let acc_token = await getAuthToken(ref_token);
+    let newest_activity = await getNewestActivity(acc_token)
+    // INSERT: write newest activity to cache (should be simple, because format is already JSON)
+} catch(error) {
+    // In case no internet connection is available -> grab data from cache
+    //let newest_activity = <insert cache file reference here>
+}
 
 /////////////////////////////////////////////////////////////
 //////////////// Widget Layout - Debugging //////////////////
@@ -526,6 +531,7 @@ title.lineLimit = 1;
 widget.addSpacer(14);
 
 // Body with activity data: Left and right data stacks
+
 // Stack initialization
 let dataStack = widget.addStack()
 dataStack.layoutHorizontally();
@@ -565,7 +571,7 @@ let firstDataSubstackRight = dataStackRight.addStack()
 firstDataSubstackRight.layoutHorizontally()
 firstDataSubstackRight.addSpacer(timeSpacer)
 let duraText = firstDataSubstackRight.addText(createDurData(newest_activity))
-duraText.font = Font.mediumSystemFont(13)
+duraText.font = Font.boldSystemFont(13)
 duraText.textColor = getColor('textColor1');
 
 dataStackRight.addSpacer(15);
@@ -575,7 +581,7 @@ let secondDataSubstackRight = dataStackRight.addStack()
 secondDataSubstackRight.layoutHorizontally()
 secondDataSubstackRight.addSpacer(velSpacer)
 let velText = secondDataSubstackRight.addText(createVelData(newest_activity))
-velText.font = Font.mediumSystemFont(13)
+velText.font = Font.boldSystemFont(13)
 velText.textColor = getColor('textColor1');
 
 dataStackRight.addSpacer(15);
@@ -585,7 +591,7 @@ let thirdDataSubstackRight = dataStackRight.addStack()
 thirdDataSubstackRight.layoutHorizontally()
 thirdDataSubstackRight.addSpacer(kudosSpacer)
 let kudosText = thirdDataSubstackRight.addText(createKudosData(newest_activity))
-kudosText.font = Font.mediumSystemFont(13)
+kudosText.font = Font.boldSystemFont(13)
 kudosText.textColor = getColor('textColor1');
 
 widget.addSpacer(5)
