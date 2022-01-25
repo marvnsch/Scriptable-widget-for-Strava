@@ -1,0 +1,77 @@
+html, body {
+    margin: 0;
+    height: 100%;
+}
+
+body {
+    background-color: rgb(29, 28, 33);
+    background-image: url(background_stripes.png);
+    background-size: cover;
+    background-position: 10px -50px;
+}
+
+.nav-link {
+    font-family: "Outfit", sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    color: white;
+    padding-left: 20px;
+    padding-right: 20px;
+    text-decoration: none;
+}
+
+.active {
+    color: rgb(252, 97, 0);
+}
+
+.nav-link:hover {
+    color: rgb(255, 125, 45);
+}
+
+.active:hover {
+    color: rgb(252, 97, 0);
+}
+
+h3 {
+    font-family: "Outfit", sans-serif;
+    font-weight: 200;
+    color: white;
+    font-size: 40px;
+}
+
+header {
+    margin-top: 20px;
+    margin-bottom: 100px;
+}
+
+.encl {
+    display: flex;
+    align-items: center;
+    background-color: transparent;
+    flex-direction: column;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.app-frame {
+    background-color: rgb(59, 58, 62);
+    height: 350px;
+    width: 350px;
+    border-radius: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#widget-pic {
+    border-radius: 50px;
+    box-shadow: 2px 2px 5px black;
+}
+
+#api-logo {
+    margin-top: 20px;
+}
