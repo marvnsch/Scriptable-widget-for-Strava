@@ -7,6 +7,8 @@ try {
 let ref_token = widgetInput[0].toString()
 let layout = widgetInput[1];
 let debug = false
+let cacheManager = FileManager.createLocal();
+const cacheFile = "StravaWidgetBackup.json";
 
 // Map lineweight
 const lineWeight = 2.5
@@ -457,12 +459,15 @@ if (debug === false){
 
 // Preparation of data for widget
 try {
-    let acc_token = await getAuthToken(ref_token);
-    let newest_activity = await getNewestActivity(acc_token)
-    // INSERT: write newest activity to cache (should be simple, because format is already JSON)
+    const acc_token = await getAuthToken(ref_token);
+    const newest_activity = await getNewestActivity(acc_token);
+    cacheManager.write(cacheFile, newest_activity);
 } catch(error) {
-    // In case no internet connection is available -> grab data from cache
-    //let newest_activity = <insert cache file reference here>
+    if (cacheManager.fileExists(cacheFile)) {
+        const newest_activity = cacheManager.read(cacheFile)
+    } else {
+        debug = true;
+    }
 }
 
 /////////////////////////////////////////////////////////////
