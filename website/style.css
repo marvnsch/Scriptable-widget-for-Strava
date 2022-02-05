@@ -1,13 +1,24 @@
 html, body {
     margin: 0;
+    min-height: 100%;
     height: 100%;
+    position: relative;
 }
 
 body {
     background-color: rgb(29, 28, 33);
-    background-image: url(background_stripes.png);
-    background-size: cover;
-    background-position: 10px -50px;
+    overflow: hidden;
+}
+
+.background-image {
+    width: 110%;
+    height: 110%;
+    left: 0;
+    top: 0;
+    position: absolute;
+    background: url(background_stripes.png) no-repeat left center / cover;
+    z-index: -1;
+    transition: transform 0.07s;
 }
 
 .nav-link {
@@ -61,7 +72,7 @@ main {
     background-color: rgb(59, 58, 62);
     height: 350px;
     width: 350px;
-    border-radius: 50px;
+    border-radius: 60px;
     display: flex;
     justify-content: center;
     align-items: center;
