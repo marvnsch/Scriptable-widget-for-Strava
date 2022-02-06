@@ -9,16 +9,22 @@
     <link href="style.css" rel="stylesheet">
 </head>
 <body>
+    <div  class="darkmode-switch-encl">
+        <div class="darkmode-switch-frame">
+            <div class="darkmode-switch"></div>
+        </div>
+        <p class="darkmode-text mode-switch">switch mode</p>
+    </div>
     <div class="encl">
         <header>
             <nav>
                 <a class="nav-link active" href="#">Home</a>
-                <a class="nav-link" href="#">About</a>
-                <a class="nav-link" href="#">Download</a>
+                <a class="nav-link mode-switch" href="#">About</a>
+                <a class="nav-link mode-switch" href="#">Download</a>
             </nav>
         </header>
         <main>
-            <h3>Scriptable widget for Strava</h3>
+            <h3 class="mode-switch">Scriptable widget for Strava</h3>
             <div class="app-frame">
                 <img alt="Widget in darkmode" id="widget-pic" src="widget_darkmode_cut.png" height="310" width="310"/>
             </div>

@@ -8,6 +8,7 @@ html, body {
 body {
     background-color: rgb(29, 28, 33);
     overflow: hidden;
+    transition: background-color 1s;
 }
 
 .background-image {
@@ -25,7 +26,6 @@ body {
     font-family: "Outfit", sans-serif;
     font-weight: 700;
     font-size: 28px;
-    color: white;
     padding-left: 20px;
     padding-right: 20px;
     text-decoration: none;
@@ -43,16 +43,58 @@ body {
     color: rgb(252, 97, 0);
 }
 
+.mode-switch {
+    color: white;
+    transition: color 1s;
+}
+
 h3 {
     font-family: "Outfit", sans-serif;
     font-weight: 200;
-    color: white;
     font-size: 40px;
 }
 
 header {
     margin-top: 20px;
     margin-bottom: 100px;
+}
+
+.darkmode-switch-encl {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 20px;
+    height: 80px;
+    width: 90px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.darkmode-text {
+    align-self: flex-end;
+    font-family: "Outfit", sans-serif;
+}
+
+.darkmode-switch-frame {
+    position: absolute;
+    background-color: lightgrey;
+    height: 40px;
+    width: 90px;
+    display: flex;
+    align-items: center;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.darkmode-switch {
+    position: absolute;
+    margin: 5px;
+    left: 3px;
+    width: 30px;
+    border-radius: 15px;
+    height: 30px;
+    background-color: rgb(59, 58, 62);
+    transition: left 1s;
 }
 
 .encl {
