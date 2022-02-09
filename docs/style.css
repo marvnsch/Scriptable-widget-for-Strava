@@ -1,0 +1,131 @@
+html, body {
+    margin: 0;
+    min-height: 100%;
+    height: 100%;
+    position: relative;
+}
+
+body {
+    background-color: rgb(29, 28, 33);
+    overflow: hidden;
+    transition: background-color 1s;
+}
+
+.background-image {
+    width: 110%;
+    height: 110%;
+    left: 0;
+    top: 0;
+    position: absolute;
+    background: url(background_stripes.png) no-repeat left center / cover;
+    z-index: -1;
+    transition: transform 0.07s;
+}
+
+.nav-link {
+    font-family: "Outfit", sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    padding-left: 20px;
+    padding-right: 20px;
+    text-decoration: none;
+}
+
+.active {
+    color: rgb(252, 97, 0);
+}
+
+.nav-link:hover {
+    color: rgb(255, 125, 45) !important;
+    transition: color 0s !important;
+}
+
+.active:hover {
+    color: rgb(252, 97, 0);
+}
+
+.mode-switch {
+    color: white;
+    transition: color 1s;
+}
+
+h3 {
+    font-family: "Outfit", sans-serif;
+    font-weight: 200;
+    font-size: 40px;
+}
+
+header {
+    margin-top: 20px;
+    margin-bottom: 100px;
+}
+
+.darkmode-switch-encl {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 20px;
+    height: 80px;
+    width: 90px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.darkmode-text {
+    align-self: flex-end;
+    font-family: "Outfit", sans-serif;
+}
+
+.darkmode-switch-frame {
+    position: absolute;
+    background-color: lightgrey;
+    height: 40px;
+    width: 90px;
+    display: flex;
+    align-items: center;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.darkmode-switch {
+    position: absolute;
+    margin: 5px;
+    left: 3px;
+    width: 30px;
+    border-radius: 15px;
+    height: 30px;
+    background-color: rgb(59, 58, 62);
+    transition: left 1s;
+}
+
+.encl {
+    display: flex;
+    align-items: center;
+    background-color: transparent;
+    flex-direction: column;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.app-frame {
+    background-color: rgb(59, 58, 62);
+    height: 350px;
+    width: 350px;
+    border-radius: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#widget-pic {
+    border-radius: 50px;
+    box-shadow: 2px 2px 5px black;
+}
+
+#api-logo {
+    margin-top: 20px;
+}
