@@ -23,7 +23,7 @@ modeSwitch.addEventListener('click', event => {
             element.style.color = 'rgb(59, 58, 62)';
             });
         bd.style.backgroundColor = 'rgb(255, 255, 255)';
-        apiLogo.src = 'api_logo_grey.png'
+        apiLogo.src = 'docs/api_logo_grey.png'
         switchPoint.style.left = '48px'
         darkModeEnabled = false;
     } else {
@@ -31,7 +31,7 @@ modeSwitch.addEventListener('click', event => {
             element.style.color = 'rgb(255, 255, 255)';
         });
         bd.style.backgroundColor = 'rgb(29, 28, 33)';
-        apiLogo.src = 'api_logo_white.png'
+        apiLogo.src = 'docs/api_logo_white.png'
         switchPoint.style.left = '3px'
         darkModeEnabled = true;
     }
