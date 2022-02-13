@@ -522,7 +522,7 @@ firstLineStack.addSpacer(3);
 
 let firstLineSubstack = firstLineStack.addStack();
 firstLineSubstack.layoutVertically();
-firstLineSubstack.size = new Size(90, 30);
+firstLineSubstack.size = new Size(90, 40);
 
 let timeDate = firstLineSubstack.addText(createDateData(newest_activity) + "   " + createTimeData(newest_activity))
 timeDate.font = Font.boldSystemFont(10);
@@ -533,7 +533,8 @@ let title = firstLineSubstack.addText(newest_activity.name)
 title.font = Font.mediumSystemFont(14)
 title.textColor = getColor('textColor')
 title.leftAlignText();
-title.lineLimit = 1;
+title.minimumScaleFactor = 0.5;
+title.lineLimit = 2;
 
 widget.addSpacer(14);
 
