@@ -1,6 +1,9 @@
 # Scriptable widget for Strava
 
-This is a widget for IOS based on the "Scriptable" framework. It displays the latest Strava activity including relevant data and a small map.
+This is a widget for IOS based on the "Scriptable" framework. 
+It displays the latest Strava activity including relevant data and a small map.
+
+Widget website: [here](https://marvnsch.github.io/Scriptable-widget-for-Strava/)
 
 <img src="https://github.com/marvnsch/Scriptable-widget-for-Strava/blob/main/docs/widget_darkmode_cut.png" width="150">
 
