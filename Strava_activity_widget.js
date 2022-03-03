@@ -34,10 +34,12 @@ const colorPalette = {
     }
 }
 
-// Widget spacer
+// Widget spacer & screen size on device
 let timeSpacer = 0
 let velSpacer = 0
 let kudosSpacer = 0
+const screenWidth = Device.screenSize()["width"]
+const screenHeight = Device.screenSize()["height"]
 
 // Supported workout types
 const workoutTypeBike = "Ride";
@@ -179,7 +181,7 @@ function createCaloriesData(workout) {
 }
 
 function setSpacers(workout) {
-    let screen_factor = 375 / Device.screenSize()["width"] //Screen size of the clients device related to the debugging device
+    const screen_factor = 375 / screenWidth
     if (workout.type === workoutTypeBike) {
         timeSpacer = 30.5 * screen_factor
         velSpacer = 8.5 * screen_factor
@@ -270,9 +272,10 @@ class Map {
         let raw_lon_array = []
         let lat_array = []
         let lon_array = []
-        let spaceLeft = 25
-        let spaceTop = 55
+        let spaceLeft = 15
+        let spaceTop = 60
         let scaleFactor
+        let mapAspectRatio = (200 - 2 * spaceLeft) / (200 - spaceTop - spaceLeft)
 
         for (let i = 0; i < dataPointsToShow - 1; i++) {
             raw_lat_array.push(input_array[i][0])
@@ -283,6 +286,7 @@ class Map {
 
         let rawLatMax = Math.max(...raw_lat_array)
 
+        //Rotate map towards north
         for (let i = 0; i < dataPointsToShow - 1; i++) {
             lat_array.push(raw_lon_array[i])
         }
@@ -290,6 +294,7 @@ class Map {
             lon_array.push(raw_lat_array[i] * -1 + rawLatMax)
         }
 
+        //Getting information about map scale
         let latMin = Math.min(...lat_array)
         let latMax = Math.max(...lat_array)
         let lonMin = Math.min(...lon_array)
@@ -297,12 +302,12 @@ class Map {
         let difLat = latMax - latMin
         let difLon = lonMax - lonMin
 
-        if (difLat > difLon) {
-            scaleFactor = (125 / difLat).toFixed(2);
-            spaceTop = spaceTop + (150 - difLon * scaleFactor) / 2;
+        if (difLat > difLon * mapAspectRatio) {
+            scaleFactor = (160 / difLat).toFixed(2);
+            spaceTop = spaceTop + (140 - difLon * scaleFactor) / 2;
         }
-        if (difLon > difLat) {
-            scaleFactor = (125 / difLon).toFixed(2);
+        if (difLon * mapAspectRatio > difLat) {
+            scaleFactor = (120 / difLon).toFixed(2);
             spaceLeft = (200 - difLat * scaleFactor) / 2;
         }
 
@@ -522,7 +527,7 @@ firstLineStack.addSpacer(3);
 
 let firstLineSubstack = firstLineStack.addStack();
 firstLineSubstack.layoutVertically();
-firstLineSubstack.size = new Size(90, 40);
+firstLineSubstack.size = new Size(90, 30);
 
 let timeDate = firstLineSubstack.addText(createDateData(newest_activity) + "   " + createTimeData(newest_activity))
 timeDate.font = Font.boldSystemFont(10);
@@ -533,8 +538,7 @@ let title = firstLineSubstack.addText(newest_activity.name)
 title.font = Font.mediumSystemFont(14)
 title.textColor = getColor('textColor')
 title.leftAlignText();
-title.minimumScaleFactor = 0.5;
-title.lineLimit = 2;
+title.lineLimit = 1;
 
 widget.addSpacer(14);
 
