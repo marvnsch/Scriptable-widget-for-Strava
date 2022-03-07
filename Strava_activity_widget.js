@@ -608,7 +608,7 @@ dataStackRight.layoutVertically();
 
 let firstDataSubstackLeft = dataStackLeft.addStack()
 firstDataSubstackLeft.layoutHorizontally()
-let caloriesText = firstDataSubstackLeft.addText("4,5 km")
+let caloriesText = firstDataSubstackLeft.addText("- k/cal")
 caloriesText.font = Font.boldSystemFont(13)
 caloriesText.textColor = getColor('textColor');
 
@@ -621,7 +621,7 @@ secondDataSubstackLeft.layoutHorizontally()
 let distanceText = secondDataSubstackLeft.addText(createDistData(newest_activity))
 distanceText.font = Font.boldSystemFont(13)
 distanceText.textColor = getColor('textColor');
-secondDataSubstackLeft.addSpacer(dataStackPadding - getSpacing("4,8 km"))
+secondDataSubstackLeft.addSpacer(dataStackPadding - getSpacing(createDistData(newest_activity)))
 
 dataStackLeft.addSpacer(15);
 
