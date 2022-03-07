@@ -4,9 +4,16 @@ try {
 } catch (e) {
     widgetInput = "".split(";"); //fallback debugging in app parameter
 }
-const ref_token = widgetInput[0].toString()
-const layout = widgetInput[1];
-const deviceScale = widgetInput[2].toString()
+
+let ref_token
+let layout
+let deviceScale
+
+if (config.runsInWidget && !config.runsInApp) {
+    ref_token = widgetInput[0].toString()
+    layout = widgetInput[1];
+    deviceScale = widgetInput[2].toString()
+}
 
 // Set debug mode
 let debug = false
@@ -68,6 +75,10 @@ const spaceValues = {
   "o" : 8.2,
   "s" : 7.2,
   "," : 4.25
+}
+const deviceWidgetSize = {
+    1 : 165,    // iPhone 11
+    2 : 155     // iPhone 11 Pro
 }
 const dataStackPadding = (deviceScale - 2 * 13 - 5) / 2 - 1
 
@@ -434,7 +445,6 @@ async function setupAssistant() {
         init_code = init_code.split("&code=")
         init_code = init_code[1].split("&scope")
         init_code = init_code[0]
-        console.log(init_code)
 
         while (init_code.length !== 40) {
             const promptCodeError = new Alert()
@@ -456,7 +466,7 @@ async function setupAssistant() {
         promptDeviceSelection.addAction('iPhone 11')
         promptDeviceSelection.addAction('iPhone 11 Pro')
         promptDeviceSelection.addCancelAction('Abbruch')
-        let deviceModel = await promptDeviceSelection.presentAlert()
+        let deviceModel = deviceWidgetSize[await promptDeviceSelection.presentAlert()]
 
         const promptLayoutSelection = new Alert()
         promptLayoutSelection.title = 'Layoutauswahl'
@@ -494,7 +504,7 @@ if (!config.runsInWidget && config.runsInApp && !debug) {
     }
 }
 if (debug === false){
-    if (widgetInput.length !== 40) {
+    if (widgetInput.length < 40) {
         let widget = new ListWidget();
         let initInfo = widget.addText("Bitte starte den Einrichtungs-assistenten, indem du das Skript in der Scriptable App ausführst.")
         initInfo.font = Font.mediumSystemFont(14)
