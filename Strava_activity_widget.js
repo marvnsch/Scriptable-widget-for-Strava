@@ -77,8 +77,8 @@ const spaceValues = {
   "," : 4.25
 }
 const deviceWidgetSize = {
-    1 : 165,    // iPhone 11
-    2 : 155     // iPhone 11 Pro
+    1 : 155,    // iPhone 11 Pro
+    2 : 165     // iPhone 11
 }
 const dataStackPadding = (deviceScale - 2 * 13 - 5) / 2 - 1
 
