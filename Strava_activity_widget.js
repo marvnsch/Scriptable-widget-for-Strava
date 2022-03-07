@@ -1,13 +1,24 @@
-// Widget Params, default values for debugging
+// Get widget parameters
 try {
     widgetInput = args.widgetParameter.split(";")
 } catch (e) {
     widgetInput = "".split(";"); //fallback debugging in app parameter
 }
-let ref_token = widgetInput[0].toString()
-let layout = widgetInput[1];
+const ref_token = widgetInput[0].toString()
+const layout = widgetInput[1];
+const deviceScale = widgetInput[2].toString()
+
+// Set debug mode
 let debug = false
-let cacheManager = FileManager.iCloud();
+
+// Initialize cache-manager and cache-directory / -file
+let cacheManager
+try {
+    cacheManager = FileManager.iCloud();
+}
+catch (e) {
+    cacheManager = FileManager.local();
+}
 const docDir = cacheManager.documentsDirectory()
 const cacheFile = cacheManager.joinPath(docDir, "StravaWidgetBackup.txt");
 
@@ -35,11 +46,30 @@ const colorPalette = {
 }
 
 // Widget spacer & screen size on device
-let timeSpacer = 0
-let velSpacer = 0
-let kudosSpacer = 0
-const screenWidth = Device.screenSize()["width"]
-const screenHeight = Device.screenSize()["height"]
+const spaceValues = {
+  "1" : 6.55,
+  "2" : 8.4,
+  "3" : 8.8,
+  "4" : 9,
+  "5" : 8.7,
+  "6" : 9,
+  "7" : 8.1,
+  "8" : 9,
+  "9" : 9,
+  "0" : 8.9,
+  "/" : 4,
+  ":" : 4,
+  "k" : 7.7,
+  "m" : 12.3,
+  " " : 3.7,
+  "K" : 9,
+  "u" : 8.2,
+  "d" : 8.6,
+  "o" : 8.2,
+  "s" : 7.2,
+  "," : 4.25
+}
+const dataStackPadding = (deviceScale - 2 * 13 - 5) / 2 - 1
 
 // Supported workout types
 const workoutTypeBike = "Ride";
@@ -59,7 +89,7 @@ activityIcon.respectScreenScale = true;
 activityIcon.opaque = false;
 
 ////////////////////////////////////////////////////////////////////////////////
-//////////////////////////         App-Functions         ///////////////////////
+//////////////////////////        Widget-Functions        //////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
 function drawActivityIcon(workout) {
@@ -180,19 +210,12 @@ function createCaloriesData(workout) {
     return (`${calories} k/cal`)
 }
 
-function setSpacers(workout) {
-    const screen_factor = 375 / screenWidth
-    if (workout.type === workoutTypeBike) {
-        timeSpacer = 30.5 * screen_factor
-        velSpacer = 8.5 * screen_factor
-        kudosSpacer = 5 * screen_factor
-    } else if (workout.type === workoutTypeRun) {
-        timeSpacer = 21 * screen_factor
-        velSpacer = 5 * screen_factor
-        kudosSpacer = 6 * screen_factor
-    } else {
-        return ("error")
-    }
+function getSpacing(text) {
+  let spaceLength = 0
+  for (let i = 0; i < text.length; i++) {
+    spaceLength = spaceLength + spaceValues[text[i]]
+  }
+  return spaceLength
 }
 
 function getColor(colorName) {
@@ -426,12 +449,30 @@ async function setupAssistant() {
             init_code = init_code[0]
         }
         let ref_token = await getRefrehToken(init_code)
-        Pasteboard.copy(ref_token)
-        const promptCopyToken = new Alert()
-        promptCopyToken.title = 'Einrichtungsassistent'
-        promptCopyToken.message = 'Die Autorisierung war erfolgreich! Dir wurde nun ein Refresh-Token in die Zwischenablage kopiert, bitte füge diesen in die Widget-Parameter ein (Langer druck auf Widget -> Edit Widget -> "Parameter").'
-        promptCopyToken.addAction('Fertigstellen')
-        await promptCopyToken.present()
+
+        const promptDeviceSelection = new Alert()
+        promptDeviceSelection.title = 'Gerätauswahl'
+        promptDeviceSelection.message = 'Bitte wähle Dein Gerät. \n Sollte Dein Gerät nicht auftauchen, wird es aktuell noch nicht unterstützt.'
+        promptDeviceSelection.addAction('iPhone 11')
+        promptDeviceSelection.addAction('iPhone 11 Pro')
+        promptDeviceSelection.addCancelAction('Abbruch')
+        let deviceModel = await promptDeviceSelection.presentAlert()
+
+        const promptLayoutSelection = new Alert()
+        promptLayoutSelection.title = 'Layoutauswahl'
+        promptLayoutSelection.message = 'Bitte wähle das gewünschte Layout.\nVerfügbare Layouts findest du hier: Link auf github Seite.'
+        promptLayoutSelection.addAction('clean')
+        promptLayoutSelection.addAction('detailed')
+        promptLayoutSelection.addCancelAction('Abbruch')
+        let layoutPreference = await promptLayoutSelection.presentAlert()
+
+        const widgetConfig = ref_token + ";" + deviceModel + ";" + layoutPreference
+        Pasteboard.copy(widgetConfig)
+        const promptCopyConfiguration = new Alert()
+        promptCopyConfiguration.title = 'Einrichtungsassistent'
+        promptCopyConfiguration.message = 'Die Autorisierung war erfolgreich! Dir wurde die Widget-Konfiguration in die Zwischenablage kopiert, bitte füge diese in die Widget-Parameter ein (Langer druck auf Widget -> Edit Widget -> "Parameter").'
+        promptCopyConfiguration.addAction('Fertigstellen')
+        await promptCopyConfiguration.present()
     }
 }
 
@@ -554,34 +595,38 @@ let dataStackRight = dataStack.addStack()
 dataStackRight.layoutVertically();
 
 // LEFT: Calories
-let caloriesText = dataStackLeft.addText(createCaloriesData(newest_activity))
-caloriesText.font = Font.boldSystemFont(13);
+
+let firstDataSubstackLeft = dataStackLeft.addStack()
+firstDataSubstackLeft.layoutHorizontally()
+let caloriesText = firstDataSubstackLeft.addText("4,5 km")
+caloriesText.font = Font.boldSystemFont(13)
 caloriesText.textColor = getColor('textColor');
-caloriesText.leftAlignText();
 
 dataStackLeft.addSpacer(15);
 
 // LEFT: Distance
-let distanceText = dataStackLeft.addText(createDistData(newest_activity))
-distanceText.font = Font.boldSystemFont(13);
+
+let secondDataSubstackLeft = dataStackLeft.addStack()
+secondDataSubstackLeft.layoutHorizontally()
+let distanceText = secondDataSubstackLeft.addText(createDistData(newest_activity))
+distanceText.font = Font.boldSystemFont(13)
 distanceText.textColor = getColor('textColor');
-distanceText.leftAlignText();
+secondDataSubstackLeft.addSpacer(dataStackPadding - getSpacing("4,8 km"))
 
 dataStackLeft.addSpacer(15);
 
 // LEFT: Elevation Gain
-let elevationGainText = dataStackLeft.addText(createElevGainData(newest_activity))
-elevationGainText.font = Font.boldSystemFont(13);
-elevationGainText.textColor = getColor('textColor');
-elevationGainText.leftAlignText();
 
-// Set spacers for right substacks (required because there is no option for right aligning text)
-setSpacers(newest_activity)
+let thirdDataSubstackLeft = dataStackLeft.addStack()
+thirdDataSubstackLeft.layoutHorizontally()
+let elevationGainText = thirdDataSubstackLeft.addText(createElevGainData(newest_activity))
+elevationGainText.font = Font.boldSystemFont(13)
+elevationGainText.textColor = getColor('textColor');
 
 // RIGHT: Duration
 let firstDataSubstackRight = dataStackRight.addStack()
 firstDataSubstackRight.layoutHorizontally()
-firstDataSubstackRight.addSpacer(timeSpacer)
+firstDataSubstackRight.addSpacer(dataStackPadding - getSpacing(createDurData(newest_activity)))
 let duraText = firstDataSubstackRight.addText(createDurData(newest_activity))
 duraText.font = Font.boldSystemFont(13)
 duraText.textColor = getColor('textColor1');
@@ -591,7 +636,7 @@ dataStackRight.addSpacer(15);
 // RIGHT: Velocity
 let secondDataSubstackRight = dataStackRight.addStack()
 secondDataSubstackRight.layoutHorizontally()
-secondDataSubstackRight.addSpacer(velSpacer)
+secondDataSubstackRight.addSpacer(dataStackPadding - getSpacing(createVelData(newest_activity)))
 let velText = secondDataSubstackRight.addText(createVelData(newest_activity))
 velText.font = Font.boldSystemFont(13)
 velText.textColor = getColor('textColor1');
@@ -601,7 +646,7 @@ dataStackRight.addSpacer(15);
 // RIGHT: Kudos
 let thirdDataSubstackRight = dataStackRight.addStack()
 thirdDataSubstackRight.layoutHorizontally()
-thirdDataSubstackRight.addSpacer(kudosSpacer)
+thirdDataSubstackRight.addSpacer(dataStackPadding - getSpacing(createKudosData(newest_activity)))
 let kudosText = thirdDataSubstackRight.addText(createKudosData(newest_activity))
 kudosText.font = Font.boldSystemFont(13)
 kudosText.textColor = getColor('textColor1');
