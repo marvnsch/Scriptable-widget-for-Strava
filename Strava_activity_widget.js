@@ -476,7 +476,7 @@ async function setupAssistant() {
         promptLayoutSelection.addCancelAction('Abbruch')
         let layoutPreference = await promptLayoutSelection.presentAlert()
 
-        const widgetConfig = ref_token + ";" + deviceModel + ";" + layoutPreference
+        const widgetConfig = ref_token + ";" + layoutPreference + ";" + deviceModel
         Pasteboard.copy(widgetConfig)
         const promptCopyConfiguration = new Alert()
         promptCopyConfiguration.title = 'Einrichtungsassistent'
