@@ -217,9 +217,9 @@ function createElevGainData(workout) {
     return (`↑${(workout.total_elevation_gain).toFixed(0)} m`)
 }
 
-function createCaloriesData(workout) {
-    let calories = (workout.kilojoules / 4.184).toFixed(0)
-    return (`${calories} k/cal`)
+function createWattsData(workout) {
+    let watts = workout.average_watts.toFixed(0)
+    return (`${watts} W`)
 }
 
 function getSpacing(text) {
@@ -609,9 +609,14 @@ dataStackRight.layoutVertically();
 
 let firstDataSubstackLeft = dataStackLeft.addStack()
 firstDataSubstackLeft.layoutHorizontally()
-let caloriesText = firstDataSubstackLeft.addText("- k/cal")
-caloriesText.font = Font.boldSystemFont(13)
-caloriesText.textColor = getColor('textColor');
+let firstLeftSubstackText;
+if (newest_activity.type === workoutTypeBike) {
+    firstLeftSubstackText = firstDataSubstackLeft.addText(createWattsData(newest_activity))
+} else {
+    firstLeftSubstackText = firstDataSubstackLeft.addText("- k/cal")
+}
+firstLeftSubstackText.font = Font.boldSystemFont(13)
+firstLeftSubstackText.textColor = getColor('textColor');
 
 dataStackLeft.addSpacer(15);
 
