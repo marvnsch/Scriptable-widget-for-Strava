@@ -40,7 +40,7 @@ const colorPalette = {
         textColor: 'EDEDED',
         textColor1: 'FC4C02',
         textColor2: '5B5A5E',
-        mapColor: '707474'
+        mapColor: '959696'
     },
     light: {
         backColor: 'FFFFFF',
@@ -81,7 +81,7 @@ const deviceWidgetSize = {
     1 : 155,    // iPhone 11 Pro
     2 : 165     // iPhone 11
 }
-const dataStackPadding = (deviceScale - 2 * 13 - 5) / 2 - 1
+const dataStackPadding = (deviceScale - 2 * 14 - 5) / 2 - 1
 
 // Supported workout types
 const workoutTypeBike = "Ride";
@@ -161,8 +161,10 @@ function drawActivityIcon(workout) {
 }
 
 function createDateData(workout) {
-    let dateString = new Date(workout.start_date);
-    return dateString.toLocaleDateString('de-DE', {day: 'numeric', month: 'numeric', year: 'numeric',})
+    let dF = new DateFormatter()
+    dF.dateFormat = "dd.MM.yy"
+    let dateString = new Date(workout.start_date_local);
+    return dF.string(dateString)
 }
 
 function createTimeData(workout) {
@@ -565,7 +567,7 @@ try {
 
 // Create widget
 let widget = new ListWidget();
-widget.setPadding(13, 13, 13, 13)
+widget.setPadding(14, 14, 14, 14)
 
 // Background (Color & Map)
 widget.backgroundColor = getColor('backColor')
@@ -581,7 +583,7 @@ let firstLineSubstack = firstLineStack.addStack();
 firstLineSubstack.layoutVertically();
 firstLineSubstack.size = new Size(90, 30);
 
-let timeDate = firstLineSubstack.addText(createDateData(newest_activity) + "   " + createTimeData(newest_activity))
+let timeDate = firstLineSubstack.addText(createDateData(newest_activity) + "     " + createTimeData(newest_activity))
 timeDate.font = Font.boldSystemFont(10);
 timeDate.textColor = getColor('textColor2');
 timeDate.leftAlignText();
