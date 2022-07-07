@@ -30,7 +30,7 @@ const docDir = cacheManager.documentsDirectory()
 const cacheFile = cacheManager.joinPath(docDir, "StravaWidgetBackup.txt");
 
 // Map lineweight
-const lineWeight = 2.5
+const lineWeight = 3
 
 // Widget Colors
 const colorPalette = {
@@ -94,6 +94,7 @@ const auth_link = "https://www.strava.com/oauth/token"
 let drawContext = new DrawContext()
 drawContext.respectScreenScale = true;
 drawContext.opaque = false;
+drawContext.setFillColor(getColor("mapColor"))
 
 // Context initialization for the icon
 let activityIcon = new DrawContext()
@@ -353,6 +354,7 @@ class Map {
             lon_array[j] = ((lon_array[j] - lonMin) * scaleFactor);
         }
 
+        // Add map coordinates to path
         for (let i = (dataPointsToShow - 1), j = 0; i >= 0; i--, j++) {
             let lat = lat_array[j] + spaceLeft
             let lon = lon_array[j] + spaceTop
@@ -362,6 +364,7 @@ class Map {
                 let point1 = new Point(lat, lon)
                 let point2 = new Point(nextlat, nextlon)
                 drawLine(drawContext, point1, point2, lineWeight, getColor('mapColor'))
+                drawContext.fillEllipse(new Rect(point2.x - lineWeight/2, point2.y - lineWeight/2, lineWeight, lineWeight))
             }
         }
     }
