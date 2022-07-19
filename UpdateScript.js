@@ -1,6 +1,6 @@
 // Updater config
 const url = 'https://raw.githubusercontent.com/marvnsch/Scriptable-widget-for-Strava/main/Strava_activity_widget.js';
-const scriptName = 'Strava-Activity-Widget-Remote'
+const scriptName = 'Strava-Activity-Widget'
 
 // API config
 const clientID = ''; // <-- Client ID from Strava API goes here
