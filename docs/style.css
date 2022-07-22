@@ -8,7 +8,10 @@ html, body {
 body {
     background-color: rgb(29, 28, 33);
     overflow: hidden;
-    transition: background-color 1s;
+    transition-delay: 0s, 0s, 0s;
+    transition-duration: 0s, 0.5s, 0s;
+    transition-property: background-color, all, all;
+    transition-timing-function: ease, ease, ease;
 }
 
 .background-image {
@@ -38,6 +41,7 @@ body {
 .nav-link:hover {
     color: rgb(255, 125, 45) !important;
     transition: color 0s !important;
+    cursor: pointer;
 }
 
 .active:hover {
@@ -49,15 +53,74 @@ body {
     transition: color 1s;
 }
 
+.dark-mode {
+    color: rgb(255, 255, 255);
+}
+
+.light-mode {
+    color: rgb(59, 58, 62);
+}
+
 h3 {
     font-family: "Outfit", sans-serif;
     font-weight: 200;
     font-size: 40px;
 }
 
+h4 {
+    font-family: "Outfit", sans-serif;
+    font-weight: 500;
+    font-size: 30px;
+    color: rgb(252, 97, 0);
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+h5  {
+    padding-left: 10px;
+    align-self: flex-end;
+    font-weight: 200;
+    font-family: "Outfit", sans-serif;
+}
+
+a {
+    color: white;
+    transition: none;
+}
+
+a:hover {
+    color: rgb(255, 125, 45);
+    transition: none;
+}
+
+li {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+ul, ol, p {
+    font-family: "Outfit", sans-serif;
+    font-weight: 400;
+    font-size: 20px;
+}
+
 header {
     margin-top: 20px;
     margin-bottom: 100px;
+}
+
+code {
+    font-weight: 200;
+    font-size: 12pt;
+}
+
+.code-section {
+    border-radius: 10px;
+    margin-top: 10px;
+    padding-left: 20px;
+    padding-top: 10px;
+    padding-bottom: 15px;
+    background-color: rgb(176, 175, 175);
 }
 
 .darkmode-switch-encl {
@@ -69,11 +132,6 @@ header {
     width: 90px;
     display: flex;
     flex-wrap: wrap;
-}
-
-.darkmode-text {
-    align-self: flex-end;
-    font-family: "Outfit", sans-serif;
 }
 
 .darkmode-switch-frame {
@@ -105,10 +163,44 @@ header {
     flex-direction: column;
 }
 
-main {
+.Home {
+    position: absolute;
+    left: 0;
+    width: 100%;
     display: flex;
-    flex-direction: column;
     align-items: center;
+    background-color: transparent;
+    flex-direction: column;
+    visibility: visible;
+}
+
+.About, .Download {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    background-color: transparent;
+    flex-direction: column;
+    visibility: hidden;
+}
+
+.about-frame, .download-frame {
+    border-radius: 30px;
+    width: 95%;
+    background-color: rgb(59, 58, 62);
+    color: white;
+    transition: background-color 1s;
+    padding-left: 40px;
+    padding-right: 40px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+main {
+    position: relative;
+    background-color: aqua;
+    width: 70%;
 }
 
 .app-frame {

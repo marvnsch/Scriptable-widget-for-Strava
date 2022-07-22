@@ -10,25 +10,62 @@
 </head>
 <body>
     <div  class="darkmode-switch-encl">
-        <div class="darkmode-switch-frame">
+        <div class="darkmode-switch-frame" onclick="switchMode()">
             <div class="darkmode-switch"></div>
         </div>
-        <p class="darkmode-text mode-switch">switch mode</p>
+        <h5 class="mode-switch dark-mode">switch mode</h5>
     </div>
     <div class="encl">
         <header>
             <nav>
-                <a class="nav-link active" href="#">Home</a>
-                <a class="nav-link mode-switch" href="#">About</a>
-                <a class="nav-link mode-switch" href="#">Download</a>
+                <a class="nav-link active" id="Home" onclick="switchSite(this)">Home</a>
+                <a class="nav-link mode-switch dark-mode" id="About" onclick="switchSite(this)">About</a>
+                <a class="nav-link mode-switch dark-mode" id="Download" onclick="switchSite(this)">Download</a>
             </nav>
         </header>
         <main>
-            <h3 class="mode-switch">Scriptable widget for Strava</h3>
-            <div class="app-frame">
-                <img alt="Widget in darkmode" id="widget-pic" src="docs/widgetDarkmode.png" height="310" width="310"/>
+            <div class="Home">
+                <h3 class="mode-switch dark-mode">Scriptable widget for Strava</h3>
+                <div class="app-frame">
+                    <img alt="Widget in darkmode" id="widget-pic" src="docs/widgetDarkmode.png" height="310" width="310"/>
+                </div>
+                <img alt="Compatible with Strava Logo" id="api-logo" src="docs/api_logo_white.png" width="300"/>
             </div>
-            <img alt="Compatible with Strava Logo" id="api-logo" src="docs/api_logo_white.png" width="300"/></main>
+            <div class="About">
+                <div class="about-frame">
+                    <h4>Overview</h4>
+                    <p class="mode-switch dark-mode">This is a widget based on the <a class="mode-switch dark-mode" href="https://scriptable.app">Scriptable</a> framework for IOS. It displays the last completed Strava activity including relevant metrics and a small map</p>
+                    <p class="mode-switch dark-mode">Until now, the following <b>workout types</b> are supported:</p>
+                    <ul class="mode-switch dark-mode">
+                        <li>Bike rides</li>
+                        <li>Runs</li>
+                    </ul>
+                    <h4>How to get started?</h4>
+                    <ol class="mode-switch dark-mode">
+                        <li>Enable API connection for your Strava-Account <a class="mode-switch dark-mode" href="https://www.strava.com/settings/api">here</a></li>
+                        <li>Download the <a class="mode-switch dark-mode" href="https://github.com/marvnsch/Scriptable-widget-for-Strava/blob/main/UpdateScript.js">UpdateScript.js</a> and replace ClientID and ClientSecret with the information from your API-Client:
+                            <div class="code-section">
+                            <code>// API config <br>
+                            const clientID = ''; // <-- Client ID from Strava API goes here <br>
+                            const clientSecret = ''; // <-- Client secret from Strava API goes here</code>
+                            </div>
+                        </li>
+
+                        <li>Execute the "UpdateScript_example.js" within the Scriptable-App (this downloads the actual widget script)</li>
+                        <li>Execute the Scriptable-Widget-for-Strava script within the Scriptable-App once to initiate the widget-setup</li>
+                        <li>Follow the steps from the setup and enjoy :)</li>
+                    </ol>
+                    <p class="mode-switch dark-mode">For more information about the Strava API see the <a class="mode-switch dark-mode" href="https://developers.strava.com/docs/reference/">Official Strava API Documentation</a></p>
+                </div>
+
+            </div>
+            <div class="Download">
+                <div class="download-frame">
+                    <h4>Under construction...</h4>
+                </div>
+
+            </div>
+        </main>
     </div>
     <div class="background-image"></div>
     <script src="docs/script.js"></script>
