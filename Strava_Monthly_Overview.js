@@ -162,20 +162,20 @@ class activityCalenderWidget{
         let headerStackHeight = headerPartition * stackSize.width;
         let headerStack = mainStack.addStack();
         headerStack.size = new Size(stackSize.width, headerStackHeight);
-        this.setHeader(headerStack, headerStackHeight);
+        await this.setHeader(headerStack, headerStackHeight);
 
         // Calender layout
         let calendarStack = mainStack.addStack();
         let calendarStackHeight = (1 - headerPartition) * stackSize;
         calendarStack.size = new Size(stackSize.width, calendarStackHeight);
         calendarStack.layoutVertically();
-        this.prepareCalendar(calendarStack, stackSize, calendarStackHeight);
+        await this.prepareCalendar(calendarStack, stackSize, calendarStackHeight);
 
         Script.setWidget(widget)
         Script.complete()
     }
 
-    static setHeader(headerStack, headerHeight) {
+    async setHeader(headerStack, headerHeight) {
         let dFormatter = new DateFormatter("MMMM");
         let headerText = headerStack.addText(dFormatter.string(new Date()));
         headerText.font = Font.mediumSystemFont(0.83 * headerHeight);
@@ -185,24 +185,24 @@ class activityCalenderWidget{
         return headerStack;
     }
 
-    static prepareCalendar(calendarStack, width, height) {
+    async prepareCalendar(calendarStack, width, height) {
         let dayBoxPadding = 5;
         let dayBoxWidth = (width - 6 * dayBoxPadding) / 7;
         let dayBoxSize = new Size(dayBoxWidth, dayBoxWidth);
         let weekStacks = [];
         let dayStacks = {};
-        let dateKey = this.getFirstDayOfMonth();
-        for (let i = 1; i <= this.getWeeksOfMonth(); i++) {
+        let dateKey = await this.getFirstDayOfMonth();
+        for (let i = 1; i <= await this.getWeeksOfMonth(); i++) {
             weekStacks[i] = calendarStack.addStack();
-            if (i !== this.getWeeksOfMonth()) {
+            if (i !== await this.getWeeksOfMonth()) {
                 calendarStack.addSpacer(dayBoxPadding);
             }
             for (let j = 1; j <= 7; j++) {
                 dayStacks[dateKey] = weekStacks[i].addStack();
                 dayStacks[dateKey].size = dayBoxSize;
                 dayStacks[dateKey].cornerRadius = 0.15 * dayBoxWidth;
-                if (!((i === 1 && j < this.getFirstDayOfMonth().getDay()) || (i === this.getWeeksOfMonth() && j > this.getLastDayOfMonth().getDay()))) {
-                    dayStacks[dateKey].color = getColor(this.getColorForTheDay(dateKey));
+                if (!((i === 1 && j < this.getFirstDayOfMonth().getDay()) || (i === await this.getWeeksOfMonth() && j > this.getLastDayOfMonth().getDay()))) {
+                    dayStacks[dateKey].color = await getColor(await this.getColorForTheDay(dateKey));
                 }
                 dateKey.setDate(dateKey.getDate() + 1);
             }
@@ -210,7 +210,7 @@ class activityCalenderWidget{
         return dayStacks;
     }
 
-    static getColorForTheDay(date) {
+    async getColorForTheDay(date) {
         // Screen activities for the date
         // If there was an activity:
         //    Calculate average distance or intensity for the whole month and evaluate if the specific activity was longer / more intense than average
@@ -220,19 +220,19 @@ class activityCalenderWidget{
         return "brightOrange"
     }
 
-    static getFirstDayOfMonth() {
+    async getFirstDayOfMonth() {
         let currentYear = new Date().getFullYear();
         let currentMonth = new Date().getMonth();
         return new Date(currentYear, currentMonth - 1, 1);
     }
 
-    static getLastDayOfMonth() {
+    async getLastDayOfMonth() {
         let currentYear = new Date().getFullYear();
         let currentMonth = new Date().getMonth();
         return new Date(currentYear, currentMonth, 0);
     }
 
-    static getWeeksOfMonth() {
+    async getWeeksOfMonth() {
         let days = this.getFirstDayOfMonth().getDay() + 6 + this.getLastDayOfMonth().getDate();
         return Math.ceil(days / 7) - 1;
     }
