@@ -1,5 +1,5 @@
 // DEBUG
-let debug = false
+let debug = true
 
 // Read widget parameters
 let ref_token;
@@ -146,33 +146,34 @@ const Swim = "Swim";
 const auth_link = "https://www.strava.com/oauth/token";
 
 // Calender widget class
-class activityCalenderWidget {
-    static buildCalendarWidget(widgetStack, stackSize) {
+class activityCalenderWidgetStack{
+    static buildCalendarWidget(widget, stackSize) {
         // Header
+        let mainStack = widget.addStack();
         let headerPartition = 0.2
         let headerStackHeight = headerPartition * stackSize.width;
-        let headerStack = widgetStack.addStack();
+        let headerStack = mainStack.addStack();
         headerStack.size = new Size(stackSize.width, headerStackHeight);
-        this.setHeader(headerStack, headerStackHeight)
+        this.setHeader(headerStack, headerStackHeight);
 
         // Calender layout
-        let calendarStack = widgetStack.addStack();
+        let calendarStack = mainStack.addStack();
         let calendarStackHeight = (1 - headerPartition) * stackSize;
         calendarStack.size = new Size(stackSize, calendarStackHeight);
         calendarStack.layoutVertically();
-        let dayStacks = this.prepareCalendar(calendarStack, stackSize, calendarStackHeight);
+        this.prepareCalendar(calendarStack, stackSize, calendarStackHeight);
 
-
-        return "this";
+        return widget;
     }
 
     static setHeader(headerStack, headerHeight) {
         let dFormatter = new DateFormatter("MMMM");
-        let headerText = headerStack.addText(dFormatter.String(Date.now()));
+        let headerText = headerStack.addText(dFormatter.String(new Date()));
         headerText.font = Font.mediumSystemFont(0.83 * headerHeight);
         if (widgetPresentation === "medium") {
             headerStack.centerAlignContent();
         }
+        return headerStack;
     }
 
     static prepareCalendar(calendarStack, width, height) {
@@ -223,7 +224,7 @@ class activityCalenderWidget {
     }
 
     static getWeeksOfMonth() {
-        let days = new this.getFirstDayOfMonth().getDay() + 6 + this.getLastDayOfMonth().getDay();
+        let days = this.getFirstDayOfMonth().getDay() + 6 + this.getLastDayOfMonth().getDay();
         return Math.ceil(days);
     }
 }
@@ -265,15 +266,15 @@ async function updateActivityStorage(access_token) {
             for (let localActivity of localActivities) {
                 localActivityIDs.push(localActivity.id)
             }
-            for (let onlineActivity of onlineActivities) {
-                if (onlineActivity.id in localActivityIDs) {
+            for (let i = 0; i < onlineActivities.length; i++) {
+                if (onlineActivities[i].id in localActivityIDs) {
                     break
                 }
-                localActivities.push(onlineActivity);
+                localActivities.push(onlineActivities[i]);
             }
         } else {
             for (let i = 0; i < onlineActivities.length; i++) {
-                localActivities.push(onlineActivity[i]);
+                localActivities.push(onlineActivities[i]);
             }
         }
         fileManager.writeString(activityStorage, JSON.stringify(localActivities));
@@ -442,14 +443,11 @@ try {
 
 // Create widget
 let widget = new ListWidget();
+widget.backgroundColor = getColor('backColor')
 let outerPadding = 0.085 * widgetHeight;
 widget.setPadding(5, outerPadding, outerPadding, outerPadding);
-let mainStack = widget.addStack();
 let calendarSize = new Size(widgetWidth - 2 * outerPadding, widgetHeight - outerPadding - 5);
-activityCalenderWidget.buildCalendarWidget(mainStack, calendarSize);
-
-// Background (Color & Map)
-widget.backgroundColor = getColor('')
+widget = activityCalenderWidgetStack.buildCalendarWidget(widget, calendarSize);
 
 if (debug === true) {
 
