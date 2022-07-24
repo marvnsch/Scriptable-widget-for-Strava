@@ -147,7 +147,7 @@ const auth_link = "https://www.strava.com/oauth/token";
 
 // Calender widget class
 class activityCalenderWidget{
-    async init() {
+    static init() {
         // Create widget
         let widget = new ListWidget();
         widget.backgroundColor = getColor('backColor')
@@ -161,20 +161,20 @@ class activityCalenderWidget{
         let headerStackHeight = headerPartition * stackSize.width;
         let headerStack = mainStack.addStack();
         headerStack.size = new Size(calendarSize.width, headerStackHeight);
-        await this.setHeader(headerStack, headerStackHeight);
+        this.setHeader(headerStack, headerStackHeight);
 
         // Calender layout
         let calendarStack = mainStack.addStack();
         let calendarStackHeight = (1 - headerPartition) * stackSize;
         calendarStack.size = new Size(calendarSize.width, calendarStackHeight);
         calendarStack.layoutVertically();
-        await this.prepareCalendar(calendarStack, calendarSize, calendarStackHeight);
+        this.prepareCalendar(calendarStack, calendarSize, calendarStackHeight);
 
         Script.setWidget(widget)
         Script.complete()
     }
 
-    async setHeader(headerStack, headerHeight) {
+    static setHeader(headerStack, headerHeight) {
         let dFormatter = new DateFormatter("MMMM");
         let headerText = headerStack.addText(dFormatter.string(new Date()));
         headerText.font = Font.mediumSystemFont(0.83 * headerHeight);
@@ -184,24 +184,24 @@ class activityCalenderWidget{
         return headerStack;
     }
 
-    async prepareCalendar(calendarStack, width, height) {
+    static prepareCalendar(calendarStack, width, height) {
         let dayBoxPadding = 5;
         let dayBoxWidth = (width - 6 * dayBoxPadding) / 7;
         let dayBoxSize = new Size(dayBoxWidth, dayBoxWidth);
         let weekStacks = [];
         let dayStacks = {};
-        let dateKey = await this.getFirstDayOfMonth();
-        for (let i = 1; i <= await this.getWeeksOfMonth(); i++) {
+        let dateKey = this.getFirstDayOfMonth();
+        for (let i = 1; i <= this.getWeeksOfMonth(); i++) {
             weekStacks[i] = calendarStack.addStack();
-            if (i !== await this.getWeeksOfMonth()) {
+            if (i !== this.getWeeksOfMonth()) {
                 calendarStack.addSpacer(dayBoxPadding);
             }
             for (let j = 1; j <= 7; j++) {
                 dayStacks[dateKey] = weekStacks[i].addStack();
                 dayStacks[dateKey].size = dayBoxSize;
                 dayStacks[dateKey].cornerRadius = 0.15 * dayBoxWidth;
-                if (!((i === 1 && j < this.getFirstDayOfMonth().getDay()) || (i === await this.getWeeksOfMonth() && j > this.getLastDayOfMonth().getDay()))) {
-                    dayStacks[dateKey].color = await getColor(await this.getColorForTheDay(dateKey));
+                if (!((i === 1 && j < this.getFirstDayOfMonth().getDay()) || (i === this.getWeeksOfMonth() && j > this.getLastDayOfMonth().getDay()))) {
+                    dayStacks[dateKey].color = getColor(this.getColorForTheDay(dateKey));
                 }
                 dateKey.setDate(dateKey.getDate() + 1);
             }
@@ -209,7 +209,7 @@ class activityCalenderWidget{
         return dayStacks;
     }
 
-    async getColorForTheDay(date) {
+    static getColorForTheDay(date) {
         // Screen activities for the date
         // If there was an activity:
         //    Calculate average distance or intensity for the whole month and evaluate if the specific activity was longer / more intense than average
@@ -219,19 +219,19 @@ class activityCalenderWidget{
         return "brightOrange"
     }
 
-    async getFirstDayOfMonth() {
+    static getFirstDayOfMonth() {
         let currentYear = new Date().getFullYear();
         let currentMonth = new Date().getMonth();
         return new Date(currentYear, currentMonth - 1, 1);
     }
 
-    async getLastDayOfMonth() {
+    static getLastDayOfMonth() {
         let currentYear = new Date().getFullYear();
         let currentMonth = new Date().getMonth();
         return new Date(currentYear, currentMonth, 0);
     }
 
-    async getWeeksOfMonth() {
+    static getWeeksOfMonth() {
         let days = this.getFirstDayOfMonth().getDay() + 6 + this.getLastDayOfMonth().getDate();
         return Math.ceil(days / 7) - 1;
     }
@@ -443,4 +443,4 @@ try {
 ///////////// Widget Layout - Newest Activity ///////////////
 /////////////////////////////////////////////////////////////
 
-await new activityCalenderWidget().init();
+activityCalenderWidget.init();
