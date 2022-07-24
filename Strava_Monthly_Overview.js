@@ -158,14 +158,14 @@ class activityCalenderWidget{
         // Header
         let mainStack = widget.addStack();
         let headerPartition = 0.2
-        let headerStackHeight = headerPartition * stackSize.width;
+        let headerStackHeight = headerPartition * calendarSize.width;
         let headerStack = mainStack.addStack();
         headerStack.size = new Size(calendarSize.width, headerStackHeight);
         this.setHeader(headerStack, headerStackHeight);
 
         // Calender layout
         let calendarStack = mainStack.addStack();
-        let calendarStackHeight = (1 - headerPartition) * stackSize;
+        let calendarStackHeight = (1 - headerPartition) * calendarSize;
         calendarStack.size = new Size(calendarSize.width, calendarStackHeight);
         calendarStack.layoutVertically();
         this.prepareCalendar(calendarStack, calendarSize, calendarStackHeight);
@@ -265,8 +265,8 @@ async function updateActivityStorage(access_token) {
     try {
         if (fileManager.fileExists(activityStorage)) {
             localActivities = JSON.parse(fileManager.readString(activityStorage));
-            for (let localActivity of localActivities) {
-                localActivityIDs.push(localActivity.id)
+            for (let i = 0; i < localActivities.length; i++) {
+                localActivityIDs.push(localActivities[i].id)
             }
             for (let i = 0; i < onlineActivities.length; i++) {
                 if (onlineActivities[i].id in localActivityIDs) {
