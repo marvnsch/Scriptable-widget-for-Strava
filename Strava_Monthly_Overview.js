@@ -146,8 +146,16 @@ const Swim = "Swim";
 const auth_link = "https://www.strava.com/oauth/token";
 
 // Calender widget class
-class activityCalenderWidgetStack{
-    static buildCalendarWidget(widget, stackSize) {
+class activityCalenderWidget{
+    async init() {
+        // Create widget
+        let widget = new ListWidget();
+        widget.backgroundColor = getColor('backColor')
+        let outerPadding = 0.085 * widgetHeight;
+        widget.setPadding(5, outerPadding, outerPadding, outerPadding);
+        let calendarSize = new Size(widgetWidth - 2 * outerPadding, widgetHeight - outerPadding - 5);
+        widget = activityCalenderWidgetStack.buildCalendarWidget(widget, calendarSize);
+
         // Header
         let mainStack = widget.addStack();
         let headerPartition = 0.2
@@ -159,16 +167,17 @@ class activityCalenderWidgetStack{
         // Calender layout
         let calendarStack = mainStack.addStack();
         let calendarStackHeight = (1 - headerPartition) * stackSize;
-        calendarStack.size = new Size(stackSize, calendarStackHeight);
+        calendarStack.size = new Size(stackSize.width, calendarStackHeight);
         calendarStack.layoutVertically();
         this.prepareCalendar(calendarStack, stackSize, calendarStackHeight);
 
-        return widget;
+        Script.setWidget(widget)
+        Script.complete()
     }
 
     static setHeader(headerStack, headerHeight) {
         let dFormatter = new DateFormatter("MMMM");
-        let headerText = headerStack.addText(dFormatter.String(new Date()));
+        let headerText = headerStack.addText(dFormatter.string(new Date()));
         headerText.font = Font.mediumSystemFont(0.83 * headerHeight);
         if (widgetPresentation === "medium") {
             headerStack.centerAlignContent();
@@ -224,16 +233,10 @@ class activityCalenderWidgetStack{
     }
 
     static getWeeksOfMonth() {
-        let days = this.getFirstDayOfMonth().getDay() + 6 + this.getLastDayOfMonth().getDay();
-        return Math.ceil(days);
+        let days = this.getFirstDayOfMonth().getDay() + 6 + this.getLastDayOfMonth().getDate();
+        return Math.ceil(days / 7) - 1;
     }
 }
-
-
-// Context initialization for the icon
-let activityIcon = new DrawContext()
-activityIcon.respectScreenScale = true;
-activityIcon.opaque = false;
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////////        Widget-Functions        //////////////////////
@@ -441,18 +444,4 @@ try {
 ///////////// Widget Layout - Newest Activity ///////////////
 /////////////////////////////////////////////////////////////
 
-// Create widget
-let widget = new ListWidget();
-widget.backgroundColor = getColor('backColor')
-let outerPadding = 0.085 * widgetHeight;
-widget.setPadding(5, outerPadding, outerPadding, outerPadding);
-let calendarSize = new Size(widgetWidth - 2 * outerPadding, widgetHeight - outerPadding - 5);
-widget = activityCalenderWidgetStack.buildCalendarWidget(widget, calendarSize);
-
-if (debug === true) {
-
-}
-
-Script.setWidget(widget)
-
-Script.complete()
+await new activityCalenderWidget().init();
