@@ -255,15 +255,22 @@ async function updateActivityStorage(access_token) {
     }
 
     try {
-        let localActivities = JSON.parse(fileManager.readString(activityStorage));
-        for (let localActivity of localActivities) {
-            localActivityIDs.push(localActivity.id)
-        }
-        for (let onlineActivity of onlineActivities) {
-            if (onlineActivity.id in localActivityIDs) {
-                break
+        if (fileManager.fileExists(activityStorage)) {
+            let localActivities = JSON.parse(fileManager.readString(activityStorage));
+            for (let localActivity of localActivities) {
+                localActivityIDs.push(localActivity.id)
             }
-            localActivities.push(onlineActivity);
+            for (let onlineActivity of onlineActivities) {
+                if (onlineActivity.id in localActivityIDs) {
+                    break
+                }
+                localActivities.push(onlineActivity);
+            }
+        } else {
+            let localActivities = [];
+            for (let onlineActivity of onlineActivities) {
+                localActivities.push(onlineActivity);
+            }
         }
         fileManager.writeString(activityStorage, JSON.stringify(localActivities));
     } catch (e) {
@@ -409,7 +416,7 @@ if (debug === false){
         let widget = new ListWidget();
         let initInfo = widget.addText("Bitte starte den Einrichtungs-assistenten, indem du das Skript in der Scriptable App ausführst.")
         initInfo.font = Font.mediumSystemFont(14)
-        initInfo.textColor = getColor('fillColor');
+        initInfo.textColor = getColor('textColor');
         Script.setWidget(widget)
         Script.complete()
     }
@@ -438,7 +445,7 @@ let calendarSize = new Size(widgetWidth - 2 * outerPadding, widgetHeight - outer
 activityCalenderWidget.buildCalendarWidget(mainStack, calendarSize);
 
 // Background (Color & Map)
-widget.backgroundColor = getColor('backColor')
+widget.backgroundColor = getColor('')
 
 if (debug === true) {
 
