@@ -154,22 +154,21 @@ class activityCalenderWidget{
         let outerPadding = 0.085 * widgetHeight;
         widget.setPadding(5, outerPadding, outerPadding, outerPadding);
         let calendarSize = new Size(widgetWidth - 2 * outerPadding, widgetHeight - outerPadding - 5);
-        widget = activityCalenderWidgetStack.buildCalendarWidget(widget, calendarSize);
 
         // Header
         let mainStack = widget.addStack();
         let headerPartition = 0.2
         let headerStackHeight = headerPartition * stackSize.width;
         let headerStack = mainStack.addStack();
-        headerStack.size = new Size(stackSize.width, headerStackHeight);
+        headerStack.size = new Size(calendarSize.width, headerStackHeight);
         await this.setHeader(headerStack, headerStackHeight);
 
         // Calender layout
         let calendarStack = mainStack.addStack();
         let calendarStackHeight = (1 - headerPartition) * stackSize;
-        calendarStack.size = new Size(stackSize.width, calendarStackHeight);
+        calendarStack.size = new Size(calendarSize.width, calendarStackHeight);
         calendarStack.layoutVertically();
-        await this.prepareCalendar(calendarStack, stackSize, calendarStackHeight);
+        await this.prepareCalendar(calendarStack, calendarSize, calendarStackHeight);
 
         Script.setWidget(widget)
         Script.complete()
