@@ -12,7 +12,9 @@ try {
     widgetInput = args.widgetParameter.split(";")
 } catch (e) {
     errorMessage = "No widget parameter found!"
-    throw new Error(errorMessage);
+    if (!config.runsInApp) {
+        throw new Error(errorMessage);
+    }
 }
 
 if (config.runsInWidget && !config.runsInApp) {
@@ -21,6 +23,8 @@ if (config.runsInWidget && !config.runsInApp) {
     rideGoal = widgetInput[2].toString();
     swimGoal = widgetInput[3].toString();
     detailedGoalStatus = widgetInput[4].toString();
+} else {
+    ref_token = "..."
 }
 
 // Initialize file manager and storage file
@@ -244,6 +248,7 @@ async function updateActivityStorage(access_token) {
     const activities_link = `https://www.strava.com/api/v3/athlete/activities?per_page=100&access_token=${access_token}`
     let req;
     let onlineActivities;
+    let localActivities = [];
     let localActivityIDs = [];
     req = new Request(activities_link)
 
@@ -256,7 +261,7 @@ async function updateActivityStorage(access_token) {
 
     try {
         if (fileManager.fileExists(activityStorage)) {
-            let localActivities = JSON.parse(fileManager.readString(activityStorage));
+            localActivities = JSON.parse(fileManager.readString(activityStorage));
             for (let localActivity of localActivities) {
                 localActivityIDs.push(localActivity.id)
             }
@@ -267,9 +272,8 @@ async function updateActivityStorage(access_token) {
                 localActivities.push(onlineActivity);
             }
         } else {
-            let localActivities = [];
-            for (let onlineActivity of onlineActivities) {
-                localActivities.push(onlineActivity);
+            for (let i = 0; i < onlineActivities.length; i++) {
+                localActivities.push(onlineActivity[i]);
             }
         }
         fileManager.writeString(activityStorage, JSON.stringify(localActivities));
