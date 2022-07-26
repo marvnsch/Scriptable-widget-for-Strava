@@ -36,7 +36,7 @@ catch (e) {
     fileManager = FileManager.local();
 }
 const docDir = fileManager.documentsDirectory();
-const activityStorage = fileManager.joinPath(docDir, "StravaActivityHistory.txt");
+const activityStorage = fileManager.joinPath(docDir, "StravaActivityHistory.JSON");
 
 // Widget colors
 const colorPalette = {
@@ -44,12 +44,14 @@ const colorPalette = {
         backColor: '1D1C21',
         brightOrange: 'FC4C02',
         lightOrange: 'FC4CFF',
+        boxGrey: '404040',
         textColor: 'EDEDED',
     },
     light: {
         backColor: 'FFFFFF',
         brightOrange: 'FC4C02',
         lightOrange: 'FC4CFF',
+        boxGrey: 'F2F2F2',
         textColor: '1D1C21',
     }
 };
@@ -153,40 +155,28 @@ class activityCalenderWidget{
         widget.backgroundColor = getColor('backColor')
         let outerPadding = 0.085 * widgetHeight;
         widget.setPadding(5, outerPadding, outerPadding, outerPadding);
-        let calendarSize = new Size(widgetWidth - 2 * outerPadding, widgetHeight - outerPadding - 5);
+        let calendarSize = new Size(widgetWidth - 2 * outerPadding - 10, widgetHeight - outerPadding - 5);
 
         // Header
         let mainStack = widget.addStack();
-        let headerPartition = 0.2
-        let headerStackHeight = headerPartition * calendarSize.width;
+        mainStack.layoutVertically()
+        let headerPartition = 0.25
+        let headerStackHeight = headerPartition * calendarSize.width
         let headerStack = mainStack.addStack();
-        headerStack.size = new Size(calendarSize.width, headerStackHeight);
-        this.setHeader(headerStack, headerStackHeight);
+        let dFormatter = new DateFormatter();
+        dFormatter.dateFormat = "MMMM"
+        let headerText = headerStack.addText(dFormatter.string(new Date()))
+        headerText.font = Font.boldSystemFont(0.83 * headerStackHeight);
+
+        mainStack.addSpacer(10)
 
         // Calender layout
         let calendarStack = mainStack.addStack();
         let calendarStackHeight = (1 - headerPartition) * calendarSize;
         calendarStack.size = new Size(calendarSize.width, calendarStackHeight);
         calendarStack.layoutVertically();
-        this.prepareCalendar(calendarStack, calendarSize, calendarStackHeight);
-
-        Script.setWidget(widget)
-        Script.complete()
-    }
-
-    static setHeader(headerStack, headerHeight) {
-        let dFormatter = new DateFormatter("MMMM");
-        let headerText = headerStack.addText(dFormatter.string(new Date()));
-        headerText.font = Font.mediumSystemFont(0.83 * headerHeight);
-        if (widgetPresentation === "medium") {
-            headerStack.centerAlignContent();
-        }
-        return headerStack;
-    }
-
-    static prepareCalendar(calendarStack, width, height) {
         let dayBoxPadding = 5;
-        let dayBoxWidth = (width - 6 * dayBoxPadding) / 7;
+        let dayBoxWidth = (calendarSize.width - 6 * dayBoxPadding) / 7;
         let dayBoxSize = new Size(dayBoxWidth, dayBoxWidth);
         let weekStacks = [];
         let dayStacks = {};
@@ -199,30 +189,43 @@ class activityCalenderWidget{
             for (let j = 1; j <= 7; j++) {
                 dayStacks[dateKey] = weekStacks[i].addStack();
                 dayStacks[dateKey].size = dayBoxSize;
-                dayStacks[dateKey].cornerRadius = 0.15 * dayBoxWidth;
+                dayStacks[dateKey].cornerRadius = 0.20 * dayBoxWidth;
                 if (!((i === 1 && j < this.getFirstDayOfMonth().getDay()) || (i === this.getWeeksOfMonth() && j > this.getLastDayOfMonth().getDay()))) {
-                    dayStacks[dateKey].color = getColor(this.getColorForTheDay(dateKey));
+                    dayStacks[dateKey].backgroundColor = getColor(this.getColorForTheDay(dateKey));
+                    console.log(dayStacks[dateKey])
+                }
+                if (j !== 7) {
+                  weekStacks[i].addSpacer(5)
                 }
                 dateKey.setDate(dateKey.getDate() + 1);
             }
         }
-        return dayStacks;
+
+        Script.setWidget(widget)
+        Script.complete()
     }
 
     static getColorForTheDay(date) {
-        // Screen activities for the date
-        // If there was an activity:
-        //    Calculate average distance or intensity for the whole month and evaluate if the specific activity was longer / more intense than average
-        //        If true -> return "brightOrange"
-        //        If false -> return "lightOrange"
-        // If there was no activity on that day -> "return grey"
-        return "brightOrange"
+        let activities = JSON.parse(fileManager.readString(activityStorage));
+        let dFormatter = new DateFormatter();
+        dFormatter.dateFormat = "dd.MM.yyyy"
+
+        for (let i = 0; i < activities.length; i++) {
+            console.log(activities.start_date_local);
+            if (activities.start_date_local < date) {
+                break
+            }
+            if (dFormatter.string(activities.start_date_local) === dFormatter.string(date)) {
+                return "brightOrange"
+            }
+        }
+        return "boxGrey"
     }
 
     static getFirstDayOfMonth() {
         let currentYear = new Date().getFullYear();
         let currentMonth = new Date().getMonth();
-        return new Date(currentYear, currentMonth - 1, 1);
+        return new Date(currentYear, currentMonth, 1);
     }
 
     static getLastDayOfMonth() {
@@ -269,7 +272,7 @@ async function updateActivityStorage(access_token) {
                 localActivityIDs.push(localActivities[i].id)
             }
             for (let i = 0; i < onlineActivities.length; i++) {
-                if (onlineActivities[i].id in localActivityIDs) {
+                if (localActivityIDs.includes(onlineActivities[i].id)) {
                     break
                 }
                 localActivities.push(onlineActivities[i]);
