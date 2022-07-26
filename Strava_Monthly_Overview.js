@@ -1,5 +1,5 @@
 // DEBUG
-let debug = true
+let debug = false
 
 // Read widget parameters
 let ref_token;
@@ -7,14 +7,12 @@ let runGoal;
 let rideGoal;
 let swimGoal;
 let detailedGoalStatus = false;
+let widgetInput;
 
 try {
-    widgetInput = args.widgetParameter.split(";")
+    widgetInput = args.widgetParameter.split(";");
 } catch (e) {
-    errorMessage = "No widget parameter found!"
-    if (!config.runsInApp) {
-        throw new Error(errorMessage);
-    }
+    widgetInput = "";
 }
 
 if (config.runsInWidget && !config.runsInApp) {
@@ -32,11 +30,14 @@ let fileManager;
 try {
     fileManager = FileManager.iCloud();
 }
-catch (e) {
+catch {
     fileManager = FileManager.local();
 }
 const docDir = fileManager.documentsDirectory();
 const activityStorage = fileManager.joinPath(docDir, "StravaActivityHistory.JSON");
+if (!fileManager.fileExists(activityStorage)) {
+    fileManager.writeString(activityStorage, "");
+}
 
 // Widget colors
 const colorPalette = {
@@ -46,6 +47,7 @@ const colorPalette = {
         lightOrange: 'FC4CFF',
         boxGrey: '404040',
         textColor: 'EDEDED',
+        errorTextColor: 'FF0000'
     },
     light: {
         backColor: 'FFFFFF',
@@ -53,6 +55,7 @@ const colorPalette = {
         lightOrange: 'FC4CFF',
         boxGrey: 'F2F2F2',
         textColor: '1D1C21',
+        errorTextColor: 'FF0000'
     }
 };
 
@@ -117,7 +120,13 @@ function deviceWidgetSizes() {
     return phones;
 }
 
-const operatingDeviceWidgetSizes = deviceWidgetSizes()[Device.screenResolution().height];
+let operatingDeviceWidgetSizes;
+
+try {
+    operatingDeviceWidgetSizes = deviceWidgetSizes()[Device.screenResolution().height];
+} catch {
+    errorWidget.init("Your phone is not supported yet, sorry!");
+}
 
 // Set widget dimensions
 let widgetWidth;
@@ -134,7 +143,7 @@ switch (widgetPresentation) {
         widgetHeight = widgetWidth;
         break;
     default:
-        widgetWidth = (operatingDeviceWidgetSizes.small / Device.screenScale());
+        widgetWidth = (operatingDeviceWidgetSizes.large / Device.screenScale());
         widgetHeight = widgetWidth;
         break;
 }
@@ -150,19 +159,32 @@ const auth_link = "https://www.strava.com/oauth/token";
 // Calender widget class
 class activityCalenderWidget{
     static init() {
-        // Create widget
+        // Create widget and set padding
         let widget = new ListWidget();
         widget.backgroundColor = getColor('backColor')
+
         let outerPadding = 0.085 * widgetHeight;
         widget.setPadding(5, outerPadding, outerPadding, outerPadding);
-        let calendarSize = new Size(widgetWidth - 2 * outerPadding - 10, widgetHeight - outerPadding - 5);
 
-        // Header
+        let componentSize;
+
+        if (widgetPresentation === "medium") {
+            componentSize = new Size((widgetWidth - 2 * outerPadding) / 2, widgetHeight - outerPadding - 5);
+        } else {
+            componentSize = new Size(widgetWidth - 2 * outerPadding - 10, widgetHeight - outerPadding - 5);
+        }
+
+        // Main stack and vertical stack
         let mainStack = widget.addStack();
-        mainStack.layoutVertically()
+        let calendarStack = mainStack.addStack();
+        calendarStack.layoutVertically()
+        let goalStack = mainStack.addStack();
+        goalStack.layoutVertically()
+
+        // Header stack
         let headerPartition = 0.25
-        let headerStackHeight = headerPartition * calendarSize.width
-        let headerStack = mainStack.addStack();
+        let headerStackHeight = headerPartition * componentSize.width
+        let headerStack = calendarStack.addStack();
         let dFormatter = new DateFormatter();
         dFormatter.dateFormat = "MMMM"
         let headerText = headerStack.addText(dFormatter.string(new Date()))
@@ -170,21 +192,22 @@ class activityCalenderWidget{
 
         mainStack.addSpacer(10)
 
-        // Calender layout
-        let calendarStack = mainStack.addStack();
-        let calendarStackHeight = (1 - headerPartition) * calendarSize;
-        calendarStack.size = new Size(calendarSize.width, calendarStackHeight);
-        calendarStack.layoutVertically();
+        // Calender box stack
+        let calendarBoxStack = mainStack.addStack();
+        let calendarStackHeight = (1 - headerPartition) * componentSize;
+        calendarBoxStack.size = new Size(componentSize.width, calendarStackHeight);
+        calendarBoxStack.layoutVertically();
+
         let dayBoxPadding = 5;
-        let dayBoxWidth = (calendarSize.width - 6 * dayBoxPadding) / 7;
+        let dayBoxWidth = (componentSize.width - 6 * dayBoxPadding) / 7;
         let dayBoxSize = new Size(dayBoxWidth, dayBoxWidth);
         let weekStacks = [];
         let dayStacks = {};
         let dateKey = this.getFirstDayOfMonth();
         for (let i = 1; i <= this.getWeeksOfMonth(); i++) {
-            weekStacks[i] = calendarStack.addStack();
+            weekStacks[i] = calendarBoxStack.addStack();
             if (i !== this.getWeeksOfMonth()) {
-                calendarStack.addSpacer(dayBoxPadding);
+                calendarBoxStack.addSpacer(dayBoxPadding);
             }
             for (let j = 1; j <= 7; j++) {
                 dayStacks[dateKey] = weekStacks[i].addStack();
@@ -201,6 +224,52 @@ class activityCalenderWidget{
             }
         }
 
+        // Goals stack (only if widget presentation is "medium"
+        if (widgetPresentation === "medium") {
+
+            let statusBarHeight = componentSize * 0.15
+
+            if (parseInt(rideGoal) !== 0) {
+                let totalMonthlyRideDistance = this.getTotalMonthlyDistanceForWorkout("Ride")
+                let rideGoalStack = goalStack.addStack();
+                rideGoalStack.layoutVertically()
+                let rideGoalText = rideGoalStack.addText("RIDE");
+                rideGoalText.font = Font.boldSystemFont(0.83 * statusBarHeight);
+                let rideGoalStatus = rideGoalStack.addStack();
+                rideGoalStatus.size = new Size(componentSize.width, statusBarHeight);
+                rideGoalStatus.backgroundGradient = this.getStatusGradient(totalMonthlyRideDistance, parseInt(rideGoal));
+                let rideGoalStatusText = rideGoalStatus.addText(`${Math.round(totalMonthlyRideDistance)} km / ${rideGoal}`)
+                rideGoalStatusText.font = Font.boldSystemFont(0.83 * statusBarHeight)
+            }
+
+            if (parseInt(runGoal) !== 0) {
+                let totalMonthlyRunDistance = this.getTotalMonthlyDistanceForWorkout("Run")
+                let runGoalStack = goalStack.addStack();
+                runGoalStack.layoutVertically()
+                let runGoalText = runGoalStack.addText("RUN");
+                runGoalText.font = Font.boldSystemFont(0.83 * statusBarHeight);
+                let runGoalStatus = runGoalStack.addStack();
+                runGoalStatus.size = new Size(componentSize.width, statusBarHeight);
+                runGoalStatus.backgroundGradient = this.getStatusGradient(totalMonthlyRunDistance, parseInt(runGoal));
+                let runGoalStatusText = runGoalStatus.addText(`${Math.round(totalMonthlyRunDistance)} km / ${runGoal}`)
+                runGoalStatusText.font = Font.boldSystemFont(0.83 * statusBarHeight)
+            }
+
+            if (parseInt(swimGoal) !== 0) {
+                let totalMonthlySwimDistance = this.getTotalMonthlyDistanceForWorkout("Swim")
+                let swimGoalStack = goalStack.addStack();
+                swimGoalStack.layoutVertically()
+                let swimGoalText = swimGoalStack.addText("SWIM");
+                swimGoalText.font = Font.boldSystemFont(0.83 * statusBarHeight);
+                let swimGoalStatus = swimGoalStack.addStack();
+                swimGoalStatus.size = new Size(componentSize.width, statusBarHeight);
+                swimGoalStatus.backgroundGradient = this.getStatusGradient(totalMonthlySwimDistance, parseInt(swimGoal));
+                let swimGoalStatusText = swimGoalStatus.addText(`${Math.round(totalMonthlySwimDistance)} km / ${swimGoal}`)
+                swimGoalStatusText.font = Font.boldSystemFont(0.83 * statusBarHeight)
+            }
+        }
+
+
         Script.setWidget(widget)
         Script.complete()
     }
@@ -213,6 +282,7 @@ class activityCalenderWidget{
         for (let i = 0; i < activities.length; i++) {
             console.log(activities.start_date_local);
             if (activities.start_date_local < date) {
+                console.log("Ende Gelände!")
                 break
             }
             if (dFormatter.string(activities.start_date_local) === dFormatter.string(date)) {
@@ -220,6 +290,39 @@ class activityCalenderWidget{
             }
         }
         return "boxGrey"
+    }
+
+    static getTotalMonthlyDistanceForWorkout(workout) {
+        let totalDistance = 0;
+        let activities = JSON.parse(fileManager.readString(activityStorage));
+        for (let i = 0; i < activities.length; i++) {
+            if (new Date(activities[i].start_date_local) < this.getFirstDayOfMonth()) {
+                break
+            } else if (activities[i].type === workout) {
+                totalDistance = totalDistance + (activities[i].distance / 1000)
+            }
+        }
+        return totalDistance
+    }
+
+    static getStatusGradient(distance, goal) {
+        let degreeOfGoalAchievement = distance / goal;
+        let processColor;
+
+        if (degreeOfGoalAchievement >= 1) {
+            degreeOfGoalAchievement = 1;
+            processColor = getColor("brightOrange")
+        } else {
+            processColor = getColor("boxGrey")
+        }
+
+        let statusGradient = new LinearGradient();
+        statusGradient.colors = [processColor, getColor("backColor")]
+        statusGradient.locations = [degreeOfGoalAchievement, degreeOfGoalAchievement]
+        statusGradient.startPoint = new Point(0, 0);
+        statusGradient.endPoint = new Point(1, 0);
+
+        return statusGradient;
     }
 
     static getFirstDayOfMonth() {
@@ -237,6 +340,18 @@ class activityCalenderWidget{
     static getWeeksOfMonth() {
         let days = this.getFirstDayOfMonth().getDay() + 6 + this.getLastDayOfMonth().getDate();
         return Math.ceil(days / 7) - 1;
+    }
+}
+
+// Error widget class
+class errorWidget {
+    static init(message) {
+        let widget = new ListWidget();
+        let initInfo = widget.addText(message)
+        initInfo.font = Font.mediumSystemFont(14)
+        initInfo.textColor = getColor('errorTextColor');
+        Script.setWidget(widget)
+        Script.complete()
     }
 }
 
@@ -339,67 +454,78 @@ async function getAuthToken(ref_token) {
 
 async function setupAssistant() {
     const promptInformation = new Alert()
-    promptInformation.title = 'Einrichtungsassistent'
-    promptInformation.message = 'Um das Activity Widget nutzen zu können, musst du die App für das Auslesen deines Strava Accounts autorisieren. Bist du damit einverstanden?'
-    promptInformation.addAction('Ja')
-    promptInformation.addCancelAction('Nein')
+    promptInformation.title = 'Setup assistant'
+    promptInformation.message = 'Using an Activity Strava Widget requires the app to read activities from your strava account. Are you okay with that?.'
+    promptInformation.addAction('Yes')
+    promptInformation.addCancelAction('No')
 
     if (await promptInformation.presentAlert() === 0) {
         const promptAuthorization = new Alert()
-        promptAuthorization.title = 'Einrichtungsassistent'
-        promptAuthorization.message = 'Um die App zu autorisieren klicke auf "Autorisieren", melde dich mit deinem Strava Account an und bestätige die Autorisierung. \n Anschließend wirst du auf eine 404 Page weitergeleitet. \n Kopiere hier gesamten Link aus der Adresszeile des Browsers.'
-        promptAuthorization.addAction('Autorisieren')
+        promptAuthorization.title = 'Setup assistant'
+        promptAuthorization.message = 'To authorize the app, please click on "Authorization" log into your Strava Account and permit the App. \n With accepting the read permission you will be forwarded to a 404 page (this is intended). \n On that 404 page copy the whole link from your browsers address bar.'
+        promptAuthorization.addAction('Authorize')
 
         await promptAuthorization.present()
         Safari.open(`https://www.strava.com/oauth/authorize?client_id=${clientID}&redirect_uri=http://localhost&response_type=code&scope=read_all,activity:read_all`);
         const promptInputCode = new Alert()
-        promptInputCode.title = 'Einrichtungsassistent'
-        promptInputCode.message = 'Bitte füge den kopierten Code in das Eingabefeld ein und bestätige mit OK'
-        promptInputCode.addTextField("Hier den Code eintragen...");
+        promptInputCode.title = 'Setup assistant'
+        promptInputCode.message = 'Please paste the copied link into the text field and confirm with OK'
+        promptInputCode.addTextField("Paste the link here...");
         promptInputCode.addAction('OK')
 
         await promptInputCode.present()
-        var init_code = promptInputCode.textFieldValue(0).trim()
-        init_code = init_code.split("&code=")
-        init_code = init_code[1].split("&scope")
-        init_code = init_code[0]
-
-        while (init_code.length !== 40) {
-            const promptCodeError = new Alert()
-            promptCodeError.title = 'Fehler'
-            promptCodeError.message = `Der Code sollte aus 40 Zeichen bestehen, der von dir eingegebene besteht nur aus ${init_code.lenght} Zeichen. Bitte kopiere den Code erneut und trage ihn in das nachfolgende Feld ein. Alternativ starte den Einrichtungsassistenten neu.`
-            init_code = promptCodeError.addTextField("Hier den Code eintragen...");
-            promptCodeError.addAction('OK')
-            promptCodeError.addCancelAction('Abbruch')
-            await promptCopyToken.present()
+        let init_code = promptInputCode.textFieldValue(0).trim()
+        let linkValid = true;
+        try {
             init_code = init_code.split("&code=")
             init_code = init_code[1].split("&scope")
             init_code = init_code[0]
+        } catch (e) {
+            linkValid = false
         }
+
+        if (linkValid === false) {
+            while (linkValid !== true) {
+                const promptCodeError = new Alert()
+                promptCodeError.title = 'Error'
+                promptCodeError.message = `Something went wrong... Please paste the link into the field below again. \n(If this error message keeps coming up, please restart the setup process)`
+                init_code = promptCodeError.addTextField("Paste the link here...");
+                promptCodeError.addAction('OK')
+                promptCodeError.addCancelAction('Cancel')
+                await promptCopyToken.present()
+                try {
+                    init_code = init_code.split("&code=");
+                    init_code = init_code[1].split("&scope");
+                    init_code = init_code[0];
+                    linkValid = true;
+                } catch (e) {
+                    linkValid = false;
+                }
+            }
+        }
+
         let ref_token = await getRefreshToken(init_code)
 
-        const promptDeviceSelection = new Alert()
-        promptDeviceSelection.title = 'Gerätauswahl'
-        promptDeviceSelection.message = 'Bitte wähle Dein Gerät. \n Sollte Dein Gerät nicht auftauchen, wird es aktuell noch nicht unterstützt.'
-        promptDeviceSelection.addAction('iPhone 11')
-        promptDeviceSelection.addAction('iPhone 11 Pro')
-        promptDeviceSelection.addCancelAction('Abbruch')
-        let deviceModel = deviceWidgetSize[await promptDeviceSelection.presentAlert()]
+        // Workout goals:
+        let runGoalInput;
+        let rideGoalInput;
+        let swimGoalInput;
+        const promptGoalSelection = new Alert()
+        promptGoalSelection.title = 'Workout goals'
+        promptGoalSelection.message = 'Please chose your monthly workout goals for the different workout types.\nIf you have no workout goal for a workout type, just insert a 0. \nNOTICE: Workout goals are only displayed in "medium" widget size.'
+        runGoalInput = promptGoalSelection.addTextField('Run goal in km')
+        rideGoalInput = promptGoalSelection.addTextField('Ride goal in km')
+        swimGoalInput = promptGoalSelection.addTextField('Swim goal in km')
+        promptGoalSelection.addAction('Done')
+        promptGoalSelection.addCancelAction('Cancel')
+        await promptGoalSelection.presentAlert()
 
-        const promptLayoutSelection = new Alert()
-        promptLayoutSelection.title = 'Layoutauswahl'
-        promptLayoutSelection.message = 'Bitte wähle das gewünschte Layout.\nVerfügbare Layouts findest du hier: Link auf github Seite.'
-        promptLayoutSelection.addAction('clean')
-        promptLayoutSelection.addAction('detailed')
-        promptLayoutSelection.addCancelAction('Abbruch')
-        let layoutPreference = await promptLayoutSelection.presentAlert()
-
-        const widgetConfig = ref_token + ";" + layoutPreference + ";" + deviceModel
+        const widgetConfig = ref_token + ";" + runGoalInput + ";" + rideGoalInput + ";" + swimGoalInput
         Pasteboard.copy(widgetConfig)
         const promptCopyConfiguration = new Alert()
-        promptCopyConfiguration.title = 'Einrichtungsassistent'
-        promptCopyConfiguration.message = 'Die Autorisierung war erfolgreich! Dir wurde die Widget-Konfiguration in die Zwischenablage kopiert, bitte füge diese in die Widget-Parameter ein (Langer druck auf Widget -> Edit Widget -> "Parameter").'
-        promptCopyConfiguration.addAction('Fertigstellen')
+        promptCopyConfiguration.title = 'Setup assistant'
+        promptCopyConfiguration.message = 'The setup process was successful! A configuration string was copied to your clipboard, please paste this into your widgets parameters (long press on the widget -> edit widget -> "Parameter").'
+        promptCopyConfiguration.addAction('Finish')
         await promptCopyConfiguration.present()
     }
 }
@@ -410,9 +536,9 @@ async function setupAssistant() {
 
 if (!config.runsInWidget && config.runsInApp && !debug) {
     const prompt = new Alert()
-    prompt.message = 'Möchtest du den Setup Assistant starten?'
-    prompt.addAction('Ja')
-    prompt.addCancelAction('Nein')
+    prompt.message = 'Do you want to start the setup assistant?'
+    prompt.addAction('Yes')
+    prompt.addCancelAction('No')
 
     if (await prompt.presentAlert() === 0) {
         await setupAssistant()
@@ -421,22 +547,15 @@ if (!config.runsInWidget && config.runsInApp && !debug) {
         Script.complete()
     }
 }
-if (debug === false){
-    if (widgetInput.length < 40) {
-        let widget = new ListWidget();
-        let initInfo = widget.addText("Bitte starte den Einrichtungs-assistenten, indem du das Skript in der Scriptable App ausführst.")
-        initInfo.font = Font.mediumSystemFont(14)
-        initInfo.textColor = getColor('textColor');
-        Script.setWidget(widget)
-        Script.complete()
-    }
+if (widgetInput.length < 40) {
+    errorWidget.init("Please start the setup assistant executing the script in the app.");
 }
 
 // Update activity database
 try {
     const acc_token = await getAuthToken(ref_token);
     await updateActivityStorage(acc_token);
-} catch(e) {
+} catch {
     if (!fileManager.fileExists(activityStorage)) {
         throw new Error("Es existieren keine Aktivitäten! (file missing)")
     }
