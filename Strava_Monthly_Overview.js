@@ -37,9 +37,6 @@ try {
 }
 const docDir = fileManager.documentsDirectory();
 const activityStorage = fileManager.joinPath(docDir, "StravaActivityHistory.txt");
-if (!fileManager.fileExists(activityStorage)) {
-    fileManager.writeString(activityStorage, "");
-}
 
 // Widget colors
 const colorPalette = {
@@ -125,7 +122,7 @@ function deviceWidgetSizes() {
 let operatingDeviceWidgetSizes;
 
 try {
-    operatingDeviceWidgetSizes = deviceWidgetSizes()[Device.screenResolution().height];
+    operatingDeviceWidgetSizes = deviceWidgetSizes()[Device.screenSize().height * Device.screenScale()];
 } catch {
     errorWidget.init("Your phone is not supported yet, sorry!");
 }
@@ -254,7 +251,7 @@ class activityCalenderWidget {
                 rideGoalStatus.cornerRadius = 5
                 rideGoalStatus.backgroundGradient = this.getStatusGradient(totalMonthlyRideDistance, parseInt(rideGoal));
                 let rideGoalStatusText = rideGoalStatus.addText(`${Math.round(totalMonthlyRideDistance)} / ${rideGoal} km`)
-                rideGoalStatusText.font = Font.boldSystemFont(0.83 * statusBarHeight)
+                rideGoalStatusText.font = Font.lightSystemFont(0.83 * statusBarHeight)
                 let rideSpacer = rideGoalStack.addStack()
                 rideSpacer.size = new Size(componentSize.width, statusBarSpacer)
             }
@@ -270,7 +267,7 @@ class activityCalenderWidget {
                 runGoalStatus.cornerRadius = 5
                 runGoalStatus.backgroundGradient = this.getStatusGradient(totalMonthlyRunDistance, parseInt(runGoal));
                 let runGoalStatusText = runGoalStatus.addText(`${Math.round(totalMonthlyRunDistance)} / ${runGoal} km`)
-                runGoalStatusText.font = Font.boldSystemFont(0.83 * statusBarHeight)
+                runGoalStatusText.font = Font.lightSystemFont(0.83 * statusBarHeight)
                 let runSpacer = runGoalStack.addStack()
                 runSpacer.size = new Size(componentSize.width, statusBarSpacer)
             }
@@ -286,7 +283,7 @@ class activityCalenderWidget {
                 swimGoalStatus.cornerRadius = 5
                 swimGoalStatus.backgroundGradient = this.getStatusGradient(totalMonthlySwimDistance, parseInt(swimGoal));
                 let swimGoalStatusText = swimGoalStatus.addText(`${Math.round(totalMonthlySwimDistance)} / ${swimGoal} km`)
-                swimGoalStatusText.font = Font.boldSystemFont(0.83 * statusBarHeight)
+                swimGoalStatusText.font = Font.lightSystemFont(0.83 * statusBarHeight)
             }
         }
 
