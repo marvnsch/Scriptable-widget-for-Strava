@@ -197,11 +197,19 @@ class activityCalenderWidget {
         calendarBoxStack.layoutVertically();
 
         let dayBoxPadding = 5;
-        let dayBoxWidth = (calendarBoxStackHeight - 5 * dayBoxPadding) / 5;
-        let dayBoxSize = new Size(dayBoxWidth, dayBoxWidth);
+        let dayBoxWidth;
         let weekStacks = [];
         let dayStacks = {};
         let dateKey = this.getFirstDayOfMonth();
+
+        if(widgetPresentation === "medium") {
+            dayBoxWidth = (calendarBoxStackHeight - 5 * dayBoxPadding) / 5;
+        } else {
+            dayBoxWidth = (componentSize.width - 6 * dayBoxPadding) / 7;
+        }
+
+        let dayBoxSize = new Size(dayBoxWidth, dayBoxWidth);
+
         for (let i = 1; i <= this.getWeeksOfMonth(); i++) {
             weekStacks[i] = calendarBoxStack.addStack();
             if (i !== this.getWeeksOfMonth()) {
@@ -221,7 +229,7 @@ class activityCalenderWidget {
             }
         }
 
-        // Goals stack (only if widget presentation is "medium"
+        // Goals stack (only if widget presentation is "medium")
         if (widgetPresentation === "medium") {
 
             // Goal stack initialization
@@ -233,6 +241,7 @@ class activityCalenderWidget {
             goalStack.size = componentSize
 
             let statusBarHeight = componentSize.height * 0.15;
+            let statusBarSpacer = (componentSize.height - 6 * statusBarHeight) / 2
 
             if (rideGoal !== "0") {
                 let totalMonthlyRideDistance = this.getTotalMonthlyDistanceForWorkout("Ride")
@@ -247,7 +256,7 @@ class activityCalenderWidget {
                 let rideGoalStatusText = rideGoalStatus.addText(`${Math.round(totalMonthlyRideDistance)} / ${rideGoal} km`)
                 rideGoalStatusText.font = Font.boldSystemFont(0.83 * statusBarHeight)
                 let rideSpacer = rideGoalStack.addStack()
-                rideSpacer.size = new Size(componentSize.width, 5)
+                rideSpacer.size = new Size(componentSize.width, statusBarSpacer)
             }
 
             if (runGoal !== "0") {
@@ -263,7 +272,7 @@ class activityCalenderWidget {
                 let runGoalStatusText = runGoalStatus.addText(`${Math.round(totalMonthlyRunDistance)} / ${runGoal} km`)
                 runGoalStatusText.font = Font.boldSystemFont(0.83 * statusBarHeight)
                 let runSpacer = runGoalStack.addStack()
-                runSpacer.size = new Size(componentSize.width, 5)
+                runSpacer.size = new Size(componentSize.width, statusBarSpacer)
             }
 
             if (swimGoal !== "0") {
@@ -317,18 +326,19 @@ class activityCalenderWidget {
 
     static getStatusGradient(distance, goal) {
         let degreeOfGoalAchievement = distance / goal;
-        let processColor = getColor("brightOrange");
-        let leftColorBorder;
+        let primaryProcessColor = getColor("brightOrange");
+        let secondaryProcessColor = getColor("lightOrange");
+        let colorBorder;
 
         if (degreeOfGoalAchievement <= 0.05) {
-            leftColorBorder = 0;
+            colorBorder = 0;
         } else {
-            leftColorBorder = degreeOfGoalAchievement - 0.01;
+            colorBorder = degreeOfGoalAchievement - 0.01;
         }
 
         let statusGradient = new LinearGradient();
-        statusGradient.colors = [processColor, getColor("boxGrey")]
-        statusGradient.locations = [leftColorBorder, degreeOfGoalAchievement]
+        statusGradient.colors = [primaryProcessColor, secondaryProcessColor, getColor("boxGrey")]
+        statusGradient.locations = [0, colorBorder, degreeOfGoalAchievement]
         statusGradient.startPoint = new Point(0, 0);
         statusGradient.endPoint = new Point(1, 0);
 
@@ -384,41 +394,50 @@ function getColor(colorName) {
 }
 
 async function updateActivityStorage(access_token) {
-    const activities_link = `https://www.strava.com/api/v3/athlete/activities?per_page=100&access_token=${access_token}`
+    let activities_link;
     let req;
     let onlineActivities;
     let localActivities = [];
     let localActivityIDs = [];
+    let activitiesToStore = [];
+
+    if (fileManager.fileExists(activityStorage)) {
+        activities_link = `https://www.strava.com/api/v3/athlete/activities?per_page=5&access_token=${access_token}`
+    } else {
+        activities_link = `https://www.strava.com/api/v3/athlete/activities?per_page=100&access_token=${access_token}`
+    }
+
     req = new Request(activities_link)
 
     try {
         onlineActivities = await req.loadJSON()
     } catch (error) {
-        console.log("Something went wrong")
         throw new Error(`Login failed with HTTP-Status-Code ${req}`)
     }
 
-    try {
-        if (fileManager.fileExists(activityStorage)) {
-            localActivities = JSON.parse(fileManager.readString(activityStorage));
-            for (let i = 0; i < localActivities.length; i++) {
-                localActivityIDs.push(localActivities[i].id)
-            }
-            for (let i = 0; i < onlineActivities.length; i++) {
-                if (localActivityIDs.includes(onlineActivities[i].id)) {
-                    break
-                }
-                localActivities.push(onlineActivities[i]);
-            }
-        } else {
-            for (let i = 0; i < onlineActivities.length; i++) {
-                localActivities.push(onlineActivities[i]);
-            }
+    if (fileManager.fileExists(activityStorage)) {
+        if (!fileManager.isFileDownloaded(activityStorage)) {
+            fileManager.downloadFileFromiCloud(activityStorage);
         }
-        fileManager.writeString(activityStorage, JSON.stringify(localActivities));
-    } catch (e) {
-        throw new Error(e)
+
+        localActivities = JSON.parse(fileManager.readString(activityStorage));
+        
+        for (let i = 0; i < localActivities.length; i++) {
+            localActivityIDs.push(localActivities[i].id)
+        }
+        for (let i = 0; i < onlineActivities.length; i++) {
+            if (localActivityIDs.includes(onlineActivities[i].id)) {
+                break
+            }
+            localActivities.unshift(onlineActivities[i]);
+        }
+        activitiesToStore = localActivities;
+    } else {
+        for (let i = 0; i < onlineActivities.length; i++) {
+            activitiesToStore.push(onlineActivities[i]);
+        }
     }
+    fileManager.writeString(activityStorage, JSON.stringify(activitiesToStore));
 }
 
 async function getRefreshToken(init_code) {
@@ -574,7 +593,8 @@ if (!config.runsInWidget && config.runsInApp && !debug) {
         Script.complete()
     }
 }
-if (widgetInput.length < 40 && !debug) {
+
+if (widgetInput.length < 45 && !debug) {
     errorWidget.init("Please start the setup assistant by executing the script in the app.");
 }
 
