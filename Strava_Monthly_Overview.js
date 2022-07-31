@@ -330,7 +330,7 @@ class activityCalenderWidget {
         if (degreeOfGoalAchievement <= 0.05) {
             colorBorder = 0;
         } else {
-            colorBorder = degreeOfGoalAchievement - 0.01;
+            colorBorder = degreeOfGoalAchievement - 0.001;
         }
 
         let statusGradient = new LinearGradient();
